@@ -16,6 +16,7 @@ public class MqDemo {
 
 
     @SneakyThrows
+    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         int ids = 0;
 
@@ -23,9 +24,10 @@ public class MqDemo {
         IMBroker broker = new IMBroker();
         broker.createTopic(topic);
 
-        IMProducer producer = new IMProducer(broker);
-        IMConsumer<Order> consumer = new IMConsumer<>(broker);
+        IMProducer producer = broker.createProducer();
+        IMConsumer<?> consumer = broker.createConsumer(topic);
         consumer.subscribe(topic);
+
         // 测试listen
         consumer.listen(message -> {
             System.out.println("onMessage => " + message);
@@ -38,7 +40,7 @@ public class MqDemo {
         }
 
         for (int i = 0; i < 10; i++) {
-            IMMessage<Order> message = consumer.poll(1000);
+            IMMessage<Order> message = (IMMessage<Order>) consumer.poll(1000);
             System.out.println("poll ok => " + message);
         }
 
@@ -52,7 +54,7 @@ public class MqDemo {
                 producer.send(topic, new IMMessage<>(ids++, order, null));
             }
             if (c == 'c') { // 消费
-                IMMessage<Order> message = consumer.poll(1000);
+                IMMessage<Order> message = (IMMessage<Order>) consumer.poll(1000);
                 System.out.println(message);
             }
         }

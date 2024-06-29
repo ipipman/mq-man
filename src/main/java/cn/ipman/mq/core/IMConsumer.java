@@ -3,7 +3,7 @@ package cn.ipman.mq.core;
 /**
  * message consumer.
  * 1种是推
- * 1种是拉取
+ * 1种是拉
  *
  * @Author IpMan
  * @Date 2024/6/29 19:55

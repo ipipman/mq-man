@@ -1,11 +1,9 @@
 package cn.ipman.mq.core;
 
-import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 

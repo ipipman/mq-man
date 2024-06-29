@@ -21,4 +21,15 @@ public class IMBroker {
         return mqMapping.putIfAbsent(topic, new IMmq(topic));
     }
 
+
+    public IMProducer createProducer() {
+        return new IMProducer(this);
+    }
+
+    public IMConsumer<?> createConsumer(String topic) {
+        IMConsumer<?> consumer = new IMConsumer<>(this);
+        consumer.subscribe(topic);
+        return consumer;
+    }
+
 }

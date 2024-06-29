@@ -17,10 +17,11 @@ import java.util.Map;
 @AllArgsConstructor
 public class IMMessage<T> {
 
-    // private String topic;
     private long id;
     private T body;
     private Map<String, String> headers; // 系统属性, X-version = 1.0
-    // private Map<String, String> properties; // 业务属性
+
+    //private String topic;
+    //private Map<String, String> properties; // 业务属性
 
 }
