@@ -16,12 +16,15 @@ public class IMConsumer<T> {
 
     public IMConsumer(IMBroker broker){
         this.broker = broker;
-        mq = broker.find(topic);
-        if (mq == null) throw new RuntimeException("topic not found");
-
     }
 
-    public IMMessage poll(long timeout){
+    public void subscribe(String topic){
+        this.topic = topic;
+        mq = broker.find(topic);
+        if (mq == null) throw new RuntimeException("topic not found");
+    }
+
+    public IMMessage<T> poll(long timeout){
         return mq.poll(timeout);
     }
 

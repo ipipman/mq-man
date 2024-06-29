@@ -1,0 +1,56 @@
+package cn.ipman.mq.demo;
+
+import cn.ipman.mq.core.IMBroker;
+import cn.ipman.mq.core.IMConsumer;
+import cn.ipman.mq.core.IMMessage;
+import cn.ipman.mq.core.IMProducer;
+import lombok.SneakyThrows;
+
+/**
+ * Description for this class
+ *
+ * @Author IpMan
+ * @Date 2024/6/29 20:06
+ */
+public class MqDemo {
+
+
+    @SneakyThrows
+    public static void main(String[] args) {
+        int ids = 0;
+
+        String topic = "im.order";
+        IMBroker broker = new IMBroker();
+        broker.createTopic(topic);
+
+        IMProducer producer = new IMProducer(broker);
+        IMConsumer<Order> consumer = new IMConsumer<>(broker);
+        consumer.subscribe(topic);
+
+        for (int i = 0; i < 10; i++) {
+            Order order = new Order(ids, "item" + ids, 100 * ids);
+            producer.send(topic, new IMMessage<>(ids++, order, null));
+        }
+
+        for (int i = 0; i < 10; i++) {
+            IMMessage<Order> message = consumer.poll(1000);
+            System.out.println(message);
+        }
+
+        while (true) {
+            char c = (char) System.in.read();
+            if (c == 'q' || c == 'e') { // 退出
+                break;
+            }
+            if (c == 'p') { // 生产
+                Order order = new Order(ids, "item" + ids, 100 * ids);
+                producer.send(topic, new IMMessage<>(ids++, order, null));
+            }
+            if (c == 'c') { // 消费
+                IMMessage<Order> message = consumer.poll(1000);
+                System.out.println(message);
+            }
+        }
+
+    }
+}
