@@ -52,10 +52,16 @@ public class MqDemo {
             if (c == 'p') { // 生产
                 Order order = new Order(ids, "item" + ids, 100 * ids);
                 producer.send(topic, new IMMessage<>(ids++, order, null));
+                System.out.println("send ok => " + order);
             }
             if (c == 'c') { // 消费
                 IMMessage<Order> message = (IMMessage<Order>) consumer.poll(1000);
-                System.out.println(message);
+                System.out.println("poll ok => " + message.getBody());
+            }
+            if (c == 'a') { // 生产
+                Order order = new Order(ids, "item" + ids, 100 * ids);
+                producer.send(topic, new IMMessage<>(ids++, order, null));
+                System.out.println("send 10 => " + order);
             }
         }
 
