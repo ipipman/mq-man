@@ -26,15 +26,20 @@ public class MqDemo {
         IMProducer producer = new IMProducer(broker);
         IMConsumer<Order> consumer = new IMConsumer<>(broker);
         consumer.subscribe(topic);
+        // 测试listen
+        consumer.listen(message -> {
+            System.out.println("onMessage => " + message);
+        });
 
         for (int i = 0; i < 10; i++) {
             Order order = new Order(ids, "item" + ids, 100 * ids);
             producer.send(topic, new IMMessage<>(ids++, order, null));
+            System.out.println("send ok => " + order);
         }
 
         for (int i = 0; i < 10; i++) {
             IMMessage<Order> message = consumer.poll(1000);
-            System.out.println(message);
+            System.out.println("poll ok => " + message);
         }
 
         while (true) {

@@ -14,19 +14,24 @@ public class IMConsumer<T> {
     String topic;
     IMmq mq;
 
-    public IMConsumer(IMBroker broker){
+    public IMConsumer(IMBroker broker) {
         this.broker = broker;
     }
 
-    public void subscribe(String topic){
+    public void subscribe(String topic) {
         this.topic = topic;
         mq = broker.find(topic);
         if (mq == null) throw new RuntimeException("topic not found");
     }
 
-    public IMMessage<T> poll(long timeout){
+    public IMMessage<T> poll(long timeout) {
         return mq.poll(timeout);
     }
+
+    public void listen(IMListener<T> listener) {
+        mq.addListen(listener);
+    }
+
 
 
 }
