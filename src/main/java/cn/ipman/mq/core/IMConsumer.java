@@ -12,7 +12,7 @@ public class IMConsumer<T> {
 
     IMBroker broker;
     String topic;
-    IMMq mq;
+    IMmq mq;
 
     public IMConsumer(IMBroker broker){
         this.broker = broker;
