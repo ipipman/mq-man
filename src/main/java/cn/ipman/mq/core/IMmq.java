@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+
 /**
+ * 实现了消息队列（MQ）的基础功能，针对特定主题进行消息的发送和接收。
+ * <p>
  * MQ for topic
  *
  * @Author IpMan
@@ -15,10 +18,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class IMmq {
 
+    // 消息主题
     String topic;
-    // 消息队列
+    // 消息队列, 使用LinkedBlockingQueue作为消息队列的实现，它是一个无界队列，具有线程安全的特性
     private final LinkedBlockingQueue<IMMessage<?>> queue = new LinkedBlockingQueue<>();
-    // 消息监听器
+    // 消息监听器,保存所有消息监听器，用于消息的推送
     List<IMListener<?>> listeners = new ArrayList<>();
 
     /**
@@ -30,6 +34,13 @@ public class IMmq {
         this.topic = topic;
     }
 
+    /**
+     * 发送消息到消息队列。如果队列接受消息，则返回true。
+     * 同时，立即向所有监听器推送该消息。
+     *
+     * @param message 要发送的消息对象。
+     * @return 如果消息成功添加到队列，则返回true；否则返回false。
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public boolean send(IMMessage<?> message) {
         boolean offered = queue.offer(message);
@@ -40,10 +51,11 @@ public class IMmq {
     }
 
     /**
-     * 拉模式获取消息
+     * 从消息队列中获取一条消息。如果在指定的超时时间内有消息可用，则返回该消息。
      *
-     * @param timeout timeout：表示等待的时间长度，单位是毫秒。在这个时间内，如果队列中有元素可取，则此方法将立即返回
-     * @param <T>     消息pojo
+     * @param timeout 等待消息的超时时间，单位为毫秒。
+     * @param <T>     消息的类型。
+     * @return 成功获取到的消息对象，如果队列为空或超时，则返回null。
      */
     @SneakyThrows
     @SuppressWarnings("unchecked")
@@ -51,6 +63,13 @@ public class IMmq {
         return (IMMessage<T>) queue.poll(timeout, TimeUnit.MILLISECONDS);
     }
 
+
+    /**
+     * 添加消息监听器，用于接收和处理特定类型的消息。
+     *
+     * @param listener 要添加的消息监听器。
+     * @param <T>      监听器处理的消息类型。
+     */
     public <T> void addListen(IMListener<T> listener) {
         listeners.add(listener);
     }
