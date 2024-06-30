@@ -1,4 +1,4 @@
-package cn.ipman.mq.core;
+package cn.ipman.mq.client;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

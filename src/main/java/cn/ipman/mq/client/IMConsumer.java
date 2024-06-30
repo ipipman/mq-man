@@ -1,4 +1,6 @@
-package cn.ipman.mq.core;
+package cn.ipman.mq.client;
+
+import cn.ipman.mq.model.IMMessage;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

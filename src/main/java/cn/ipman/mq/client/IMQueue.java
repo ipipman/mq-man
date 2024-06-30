@@ -1,5 +1,6 @@
-package cn.ipman.mq.core;
+package cn.ipman.mq.client;
 
+import cn.ipman.mq.model.IMMessage;
 import lombok.SneakyThrows;
 
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ public class IMQueue {
     private final LinkedBlockingQueue<IMMessage<?>> queue = new LinkedBlockingQueue<>();
     // 消息监听器,保存所有消息监听器，用于消息的推送
     List<IMListener<?>> listeners = new ArrayList<>();
-
 
     /**
      * 对于无界队列（如LinkedBlockingQueue，除非指定了容量），因为总是有空间可以添加元素，所以offer方法总会成功并返回true。

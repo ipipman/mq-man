@@ -1,6 +1,5 @@
-package cn.ipman.mq.server;
+package cn.ipman.mq.model;
 
-import cn.ipman.mq.core.IMMessage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

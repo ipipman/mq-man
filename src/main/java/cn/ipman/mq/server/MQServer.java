@@ -1,6 +1,7 @@
 package cn.ipman.mq.server;
 
-import cn.ipman.mq.core.IMMessage;
+import cn.ipman.mq.model.IMMessage;
+import cn.ipman.mq.model.Result;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/mq")
 public class MQServer {
-
 
     // send
     @RequestMapping("/send")
@@ -40,15 +40,20 @@ public class MQServer {
         return Result.ok();
     }
 
-    // subscriber
+    // 1. subscriber
     @RequestMapping("/sub")
-    public Result<String> subscribe(@RequestParam("t") String topic, @RequestParam("cid") String consumerId) {
+    public Result<String> subscribe(@RequestParam("t") String topic,
+                                    @RequestParam("cid") String consumerId) {
+
+
+
         return Result.ok();
     }
 
     // unsubscribe
     @RequestMapping("/unsub")
-    public Result<String> unSubscribe(@RequestParam("t") String topic, @RequestParam("cid") String consumerId) {
+    public Result<String> unSubscribe(@RequestParam("t") String topic,
+                                      @RequestParam("cid") String consumerId) {
         return Result.ok();
     }
 

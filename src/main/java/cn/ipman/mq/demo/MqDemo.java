@@ -1,9 +1,9 @@
 package cn.ipman.mq.demo;
 
-import cn.ipman.mq.core.IMBroker;
-import cn.ipman.mq.core.IMConsumer;
-import cn.ipman.mq.core.IMMessage;
-import cn.ipman.mq.core.IMProducer;
+import cn.ipman.mq.client.IMBroker;
+import cn.ipman.mq.client.IMConsumer;
+import cn.ipman.mq.model.IMMessage;
+import cn.ipman.mq.client.IMProducer;
 import lombok.SneakyThrows;
 
 /**

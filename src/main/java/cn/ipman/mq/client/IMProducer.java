@@ -1,4 +1,6 @@
-package cn.ipman.mq.core;
+package cn.ipman.mq.client;
+
+import cn.ipman.mq.model.IMMessage;
 
 /**
  * 消息队列生产者类。

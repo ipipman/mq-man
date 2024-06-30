@@ -1,6 +1,6 @@
 package cn.ipman.mq.server;
 
-import cn.ipman.mq.core.IMMessage;
+import cn.ipman.mq.model.IMMessage;
 
 /**
  * queues.
@@ -30,6 +30,5 @@ public class MessageQueue {
         if (idx <= index) return queue[idx]; // 按位置拿数据
         return null;
     }
-
-
+    
 }
