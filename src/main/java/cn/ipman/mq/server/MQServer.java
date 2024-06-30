@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Description for this class
+ * MQ server.
  *
  * @Author IpMan
  * @Date 2024/6/30 20:17
