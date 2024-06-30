@@ -15,18 +15,20 @@ import java.util.Map;
  */
 public class MessageQueue {
 
+    // 所有队列, topic为key, Queue为值, 多个consumer可以订阅同一个topic
     public static final Map<String, MessageQueue> queues = new HashMap<>();
-
     private static final String TEST_TOPIC = "cn.ipman.test";
 
     static {
         queues.put(TEST_TOPIC, new MessageQueue("cn.ipman.test"));
     }
 
-    // 记录客户端订阅关系
+    // 记录客户端订阅关系, 记录consumerID的消费关系,如消费哪些topic, 以及在topic的消费位置offset
     Map<String, MessageSubscription> subscriptions = new HashMap<>();
+
+
     String topic;
-    IMMessage<?>[] queue = new IMMessage[1024 * 10];
+    IMMessage<?>[] queue = new IMMessage[1024 * 10];  // 用来存储message
     private int index = 0;
 
     public MessageQueue(String topic) {

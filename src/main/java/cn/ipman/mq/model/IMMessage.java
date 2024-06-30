@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @AllArgsConstructor
 public class IMMessage<T> {
 
-
+    // 消息ID
     static AtomicLong MID = new AtomicLong(0);
 
     /**

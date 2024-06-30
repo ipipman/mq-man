@@ -2,7 +2,6 @@ package cn.ipman.mq.server;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.SneakyThrows;
 
 /**
  * Message Subscription.
