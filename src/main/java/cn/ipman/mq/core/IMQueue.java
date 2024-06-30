@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @Author IpMan
  * @Date 2024/6/29 19:44
  */
-public class IMmq {
+public class IMQueue {
 
     // 消息主题
     String topic;
@@ -25,12 +25,13 @@ public class IMmq {
     // 消息监听器,保存所有消息监听器，用于消息的推送
     List<IMListener<?>> listeners = new ArrayList<>();
 
+
     /**
      * 对于无界队列（如LinkedBlockingQueue，除非指定了容量），因为总是有空间可以添加元素，所以offer方法总会成功并返回true。
      *
      * @param topic 消息主题
      */
-    public IMmq(String topic) {
+    public IMQueue(String topic) {
         this.topic = topic;
     }
 
@@ -45,7 +46,7 @@ public class IMmq {
     public boolean send(IMMessage<?> message) {
         boolean offered = queue.offer(message);
 
-        // 简化下, 正常应该是推送给客户端
+        // 发送时, 通知订阅这. 这里简化了, 正常应该是推送给客户端
         listeners.forEach(listener -> listener.onMessage((IMMessage) message));
         return offered;
     }

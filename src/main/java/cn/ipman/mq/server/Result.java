@@ -21,7 +21,7 @@ public class Result<T> {
         return new Result<>(1, "OK");
     }
 
-    public static Result<IMMessage<String>> msg(String s) {
-        return new Result<>(1, IMMessage.createMessage(s, null));
+    public static Result<IMMessage<String>> msg(String message) {
+        return new Result<>(1, IMMessage.createMessage(message, null));
     }
 }

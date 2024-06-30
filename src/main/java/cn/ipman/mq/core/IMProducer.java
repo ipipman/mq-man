@@ -34,9 +34,9 @@ public class IMProducer {
      */
     public boolean send(String topic, IMMessage<?> message) {
         // 通过消息代理按主题定位消息队列
-        IMmq mq = broker.find(topic);
-        if (mq == null) throw new RuntimeException("topic not found");
+        IMQueue queue = broker.find(topic);
+        if (queue == null) throw new RuntimeException("topic not found");
         // 向找到的消息队列发送消息，并返回发送操作的结果
-        return mq.send(message);
+        return queue.send(message);
     }
 }

@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class IMConsumer<T> {
 
+    static AtomicInteger CID = new AtomicInteger(0);
+
     private String id;
 
     /**
@@ -29,9 +31,8 @@ public class IMConsumer<T> {
      * 消息队列对象。
      * 用于具体的消息消费操作。
      */
-    IMmq mq;
+    IMQueue queue;
 
-    static AtomicInteger CID = new AtomicInteger(0);
 
     /**
      * 构造函数，初始化消息消费者。
@@ -52,8 +53,8 @@ public class IMConsumer<T> {
      */
     public void subscribe(String topic) {
         this.topic = topic;
-        mq = broker.find(topic);
-        if (mq == null) throw new RuntimeException("topic not found");
+        this.queue = broker.find(topic);
+        if (queue == null) throw new RuntimeException("topic not found");
     }
 
     /**
@@ -64,7 +65,7 @@ public class IMConsumer<T> {
      * @return 消息对象，如果队列为空则返回null。
      */
     public IMMessage<T> poll(long timeout) {
-        return mq.poll(timeout);
+        return queue.poll(timeout);
     }
 
     /**
@@ -74,7 +75,7 @@ public class IMConsumer<T> {
      * @param listener 消息监听器。
      */
     public void listen(IMListener<T> listener) {
-        mq.addListen(listener);
+        queue.addListen(listener);
     }
 
 }
