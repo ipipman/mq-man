@@ -1,5 +1,7 @@
 package cn.ipman.mq.core;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * 消息消费者接口。
  * 用于订阅并消费特定主题的消息。
@@ -9,6 +11,8 @@ package cn.ipman.mq.core;
  * @Date 2024/6/29 19:55
  */
 public class IMConsumer<T> {
+
+    private String id;
 
     /**
      * 消息中间件代理对象。
@@ -27,6 +31,8 @@ public class IMConsumer<T> {
      */
     IMmq mq;
 
+    static AtomicInteger CID = new AtomicInteger(0);
+
     /**
      * 构造函数，初始化消息消费者。
      *
@@ -34,6 +40,7 @@ public class IMConsumer<T> {
      */
     public IMConsumer(IMBroker broker) {
         this.broker = broker;
+        this.id = "CID" + CID.getAndIncrement();
     }
 
     /**

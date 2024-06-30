@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 即时通讯（IM）消息模型类，用于消息传输的数据载体。
@@ -16,6 +18,9 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IMMessage<T> {
+
+
+    static AtomicLong MID = new AtomicLong(0);
 
     /**
      * 消息唯一标识符，用于唯一识别每条消息。
@@ -35,5 +40,13 @@ public class IMMessage<T> {
 
     //private String topic;
     //private Map<String, String> properties; // 业务属性
+
+    public static long getId() {
+        return MID.getAndIncrement();
+    }
+
+    public static IMMessage<String> createMessage(String body, Map<String, String> headers) {
+        return new IMMessage<>(getId(), body, headers);
+    }
 
 }

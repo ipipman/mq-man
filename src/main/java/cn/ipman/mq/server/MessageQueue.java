@@ -10,8 +10,8 @@ import cn.ipman.mq.core.IMMessage;
  */
 public class MessageQueue {
 
-    private String topic;
-    private IMMessage<?>[] queue = new IMMessage[1024 * 10];
+    String topic;
+    IMMessage<?>[] queue = new IMMessage[1024 * 10];
     private int index = 0;
 
     public MessageQueue(String topic) {
@@ -19,7 +19,7 @@ public class MessageQueue {
     }
 
     public int send(IMMessage<?> message) {
-        if (index >= queue.length) {
+        if (index >= queue.length) { // 写满了~
             return -1;
         }
         queue[index++] = message;
@@ -27,7 +27,7 @@ public class MessageQueue {
     }
 
     public IMMessage<?> receive(int idx) {
-        if (idx <= index)  return queue[idx]; // 按位置拿数据
+        if (idx <= index) return queue[idx]; // 按位置拿数据
         return null;
     }
 
