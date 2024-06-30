@@ -28,7 +28,6 @@ public class Result<T> {
         return new Result<>(1, message);
     }
 
-
     public static Result<String> ok(String msg) {
         return new Result<>(1, msg);
     }

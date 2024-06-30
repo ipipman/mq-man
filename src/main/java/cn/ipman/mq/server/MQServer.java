@@ -28,8 +28,7 @@ public class MQServer {
     // receive
     @RequestMapping("/receive")
     public Result<IMMessage<?>> receive(@RequestParam("t") String topic,
-                                             @RequestParam("cid") String consumerId) {
-        MessageQueue.sub(new MessageSubscription(topic, consumerId, -1));
+                                        @RequestParam("cid") String consumerId) {
         return Result.msg(MessageQueue.receive(topic, consumerId));
     }
 
@@ -38,15 +37,14 @@ public class MQServer {
     public Result<String> ack(@RequestParam("t") String topic,
                               @RequestParam("cid") String consumerId,
                               @RequestParam("offset") Integer offset) {
-        return Result.ok();
+        return Result.ok("" + MessageQueue.ack(topic, consumerId, offset));
     }
 
     // 1. subscriber
     @RequestMapping("/sub")
     public Result<String> subscribe(@RequestParam("t") String topic,
                                     @RequestParam("cid") String consumerId) {
-
-
+        MessageQueue.sub(new MessageSubscription(topic, consumerId, -1));
         return Result.ok();
     }
 
@@ -54,6 +52,7 @@ public class MQServer {
     @RequestMapping("/unsub")
     public Result<String> unSubscribe(@RequestParam("t") String topic,
                                       @RequestParam("cid") String consumerId) {
+        MessageQueue.unsub(new MessageSubscription(topic, consumerId, -1));
         return Result.ok();
     }
 

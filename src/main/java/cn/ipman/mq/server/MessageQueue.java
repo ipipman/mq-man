@@ -23,7 +23,7 @@ public class MessageQueue {
         queues.put(TEST_TOPIC, new MessageQueue("cn.ipman.test"));
     }
 
-    // 记录客户端订阅
+    // 记录客户端订阅关系
     Map<String, MessageSubscription> subscriptions = new HashMap<>();
     String topic;
     IMMessage<?>[] queue = new IMMessage[1024 * 10];
@@ -52,10 +52,21 @@ public class MessageQueue {
         subscriptions.putIfAbsent(consumerId, subscription);
     }
 
+    private void unsubscribe(MessageSubscription subscription) {
+        String consumerId = subscription.getConsumerId();
+        subscriptions.remove(consumerId);
+    }
+
     public static void sub(MessageSubscription subscription) {
         MessageQueue messageQueue = queues.get(subscription.getTopic());
         if (messageQueue == null) throw new RuntimeException("topic not found");
         messageQueue.subscribe(subscription);
+    }
+
+    public static void unsub(MessageSubscription subscription) {
+        MessageQueue messageQueue = queues.get(subscription.getTopic());
+        if (messageQueue == null) return;
+        messageQueue.unsubscribe(subscription);
     }
 
     public static int send(String topic, String consumerId, IMMessage<String> message) {
@@ -63,7 +74,6 @@ public class MessageQueue {
         if (messageQueue == null) throw new RuntimeException("topic not found");
         return messageQueue.send(message);
     }
-
 
     public static IMMessage<?> receive(String topic, String consumerId, int idx) {
         MessageQueue messageQueue = queues.get(topic);
@@ -84,4 +94,22 @@ public class MessageQueue {
         }
         throw new RuntimeException("subscriptions not found for topic/consumerId" + topic + "/" + consumerId);
     }
+
+
+    // 如果消费消息,不传消费message的index时,需要手动ack确定并修改consumer的offset
+    public static int ack(String topic, String consumerId, int offset) {
+        MessageQueue messageQueue = queues.get(topic);
+        if (messageQueue == null) throw new RuntimeException("topic not found");
+        if (messageQueue.subscriptions.containsKey(consumerId)) {
+            MessageSubscription subscription = messageQueue.subscriptions.get(consumerId);
+            if (offset > subscription.getOffset() && offset <= messageQueue.index) {
+                subscription.setOffset(offset);
+                return offset;
+            }
+            return -1;
+        }
+        throw new RuntimeException("subscriptions not found for topic/consumerId" + topic + "/" + consumerId);
+    }
+
+
 }
