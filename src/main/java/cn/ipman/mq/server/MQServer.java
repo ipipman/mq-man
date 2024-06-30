@@ -22,21 +22,22 @@ public class MQServer {
     public Result<String> send(@RequestParam("t") String topic,
                                @RequestParam("cid") String consumerId,
                                @RequestBody IMMessage<String> message) {
-        return Result.ok();
+        return Result.ok("msg" + MessageQueue.send(topic, consumerId, message));
     }
 
     // receive
     @RequestMapping("/receive")
-    public Result<IMMessage<String>> receive(@RequestParam("t") String topic,
+    public Result<IMMessage<?>> receive(@RequestParam("t") String topic,
                                              @RequestParam("cid") String consumerId) {
-        return Result.msg("hello," + consumerId);
+        MessageQueue.sub(new MessageSubscription(topic, consumerId, -1));
+        return Result.msg(MessageQueue.receive(topic, consumerId));
     }
 
     // ack
     @RequestMapping("/ack")
     public Result<String> ack(@RequestParam("t") String topic,
-                                         @RequestParam("cid") String consumerId,
-                                         @RequestParam("offset") Integer offset) {
+                              @RequestParam("cid") String consumerId,
+                              @RequestParam("offset") Integer offset) {
         return Result.ok();
     }
 
@@ -44,7 +45,6 @@ public class MQServer {
     @RequestMapping("/sub")
     public Result<String> subscribe(@RequestParam("t") String topic,
                                     @RequestParam("cid") String consumerId) {
-
 
 
         return Result.ok();

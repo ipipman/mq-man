@@ -1,5 +1,6 @@
 package cn.ipman.mq.server;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
 
@@ -10,6 +11,7 @@ import lombok.SneakyThrows;
  * @Date 2024/6/30 20:29
  */
 @Data
+@AllArgsConstructor
 public class MessageSubscription {
 
     private String topic;

@@ -20,7 +20,16 @@ public class Result<T> {
         return new Result<>(1, "OK");
     }
 
-    public static Result<IMMessage<String>> msg(String message) {
+    public static Result<IMMessage<?>> msg(String message) {
         return new Result<>(1, IMMessage.createMessage(message, null));
+    }
+
+    public static Result<IMMessage<?>> msg(IMMessage<?> message) {
+        return new Result<>(1, message);
+    }
+
+
+    public static Result<String> ok(String msg) {
+        return new Result<>(1, msg);
     }
 }

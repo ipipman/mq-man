@@ -44,7 +44,7 @@ public class IMMessage<T> {
         return MID.getAndIncrement();
     }
 
-    public static IMMessage<String> createMessage(String body, Map<String, String> headers) {
+    public static IMMessage<?> createMessage(String body, Map<String, String> headers) {
         return new IMMessage<>(getId(), body, headers);
     }
 
