@@ -142,7 +142,7 @@ public class MessageQueue {
             }
             return -1;
         }
-        throw new RuntimeException("subscriptions not found for topic/consumerId " + topic + "/" + consumerId);
+        throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
     }
 
 

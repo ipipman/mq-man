@@ -55,11 +55,9 @@ public class Consumer<T> {
         return receive;
     }
 
-
     public boolean ack(String topic, int offset) {
         return broker.ack(topic, this.id, offset);
     }
-
 
     public boolean ack(String topic, Message<?> message) {
         // 从header里获取offset
@@ -80,6 +78,5 @@ public class Consumer<T> {
 
 
     public Listener<?> listener;
-
 
 }
