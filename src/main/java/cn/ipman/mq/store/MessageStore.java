@@ -26,7 +26,7 @@ import java.util.Scanner;
 public class MessageStore {
 
     String topic;
-    public static final int LEN = 1024 * 1_000; //1MB
+    public static final int LEN = 1024 * 1024; //1MB
 
     public MessageStore(String topic) {
         this.topic = topic;
@@ -89,7 +89,7 @@ public class MessageStore {
         if (entry == null) return null;
         readOnlyBuffer.position(entry.getOffset());
 
-        int len = entry.getLength();
+        int len = entry.getLength(); // 数据的长度
         byte[] bytes = new byte[len];
         readOnlyBuffer.get(bytes, 0, len);
         String json = new String(bytes, StandardCharsets.UTF_8);

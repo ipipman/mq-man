@@ -60,10 +60,13 @@ public class Consumer<T> {
     }
 
     public boolean ack(String topic, Message<?> message) {
-        // 从header里获取offset
+        // 从header里获取offset, 实际是在send时存到了Entry里
         int offset = Integer.parseInt(message.getHeaders().get("X-offset"));
         return ack(topic, offset);
     }
+
+
+    public Listener<?> listener;
 
     /**
      * 注册消息监听器。
@@ -75,8 +78,5 @@ public class Consumer<T> {
         this.listener = listener;
         broker.addConsumer(topic, this);
     }
-
-
-    public Listener<?> listener;
 
 }

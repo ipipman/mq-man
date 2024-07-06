@@ -29,10 +29,10 @@ public class MqDemo {
 
         // consumer-0
         Consumer<?> consumer = broker.createConsumer(topic);
-//        // 测试listen监听topic
-//        consumer.listen(topic, message -> {
-//            System.out.println("listener onMessage => " + message);
-//        });
+        // 测试listen监听topic
+        consumer.listen(topic, message -> {
+            System.out.println("listener onMessage => " + message);
+        });
 
         // consumer-1
         Consumer<?> consumer1 = broker.createConsumer(topic);
@@ -52,7 +52,7 @@ public class MqDemo {
         while (true) {
             char c = (char) System.in.read();
             if (c == 'q' || c == 'e') { // 退出
-                //consumer1.unSubscribe(topic);
+                consumer1.unSubscribe(topic);
                 break;
             }
             if (c == 'p') { // 生产
@@ -60,11 +60,12 @@ public class MqDemo {
                 producer.send(topic, new Message<>(ids++, JSON.toJSONString(order), null));
                 System.out.println("send ok => " + order);
             }
-//            if (c == 'c') { // 消费
-//                Message<Order> message = (Message<Order>) consumer1.receive(topic);
-//                System.out.println("poll ok => " + message.getBody());
-//                consumer1.ack(topic, message);
-//            }
+            if (c == 'c') { // 消费
+                Message<Order> message = (Message<Order>) consumer1.receive(topic);
+                if (message == null) continue;
+                System.out.println("poll ok => " + message.getBody());
+                consumer1.ack(topic, message);
+            }
             if (c == 'a') { // 生产10个
                 for (int i = 0; i < 10; i++) {
                     Order order = new Order(ids, "item" + ids, 100 * ids);

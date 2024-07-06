@@ -48,9 +48,7 @@ public class MessageQueue {
             int nextOffset = 0;
             if (offset > -1) {
                 Indexer.Entry entry = Indexer.getEntry(topic, offset);
-                if (entry == null) {
-                    return null;
-                }
+                if (entry == null) return null;
                 nextOffset = offset + entry.getLength();
             }
 
@@ -60,7 +58,12 @@ public class MessageQueue {
             while (receive != null) {
                 result.add(receive);
                 if (result.size() >= size) break;
-                receive = messageQueue.receive(offset);
+
+                offset = Integer.parseInt(receive.getHeaders().get("X-offset"));
+                Indexer.Entry entry = Indexer.getEntry(topic, offset);
+                if (entry == null) break;
+                nextOffset = offset + entry.getLength();
+                receive = messageQueue.receive(nextOffset);
             }
             System.out.println(" ===>> batch: topic/cid/size = " + topic + "/" + consumerId + "/" + offset + "/" + result.size());
             System.out.println(" ===>> batch: last message = " + receive);
@@ -70,7 +73,7 @@ public class MessageQueue {
     }
 
     public int send(Message<String> message) {
-        int offset = store.pos();
+        int offset = store.pos(); // 文件的位置
         message.getHeaders().put("X-offset", String.valueOf(offset)); // 设置偏移量
         store.write(message);
         return offset;
@@ -127,13 +130,12 @@ public class MessageQueue {
         if (messageQueue == null) throw new RuntimeException("topic not found");
         if (messageQueue.subscriptions.containsKey(consumerId)) {
 
+            // 这个offset来源于客户端ack
             int offset = messageQueue.subscriptions.get(consumerId).getOffset();
             int nextOffset = 0;
             if (offset > -1) {
                 Indexer.Entry entry = Indexer.getEntry(topic, offset);
-                if (entry == null) {
-                    return null;
-                }
+                if (entry == null) return null;
                 nextOffset = offset + entry.getLength();
             }
 

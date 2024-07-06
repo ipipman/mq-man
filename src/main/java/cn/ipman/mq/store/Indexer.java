@@ -19,7 +19,7 @@ public class Indexer {
 
     // 全局的
     static MultiValueMap<String, Entry> indexers = new LinkedMultiValueMap<>();
-    static Map<Integer, Entry> mappings = new HashMap<>();
+    static Map<Integer, Entry> mappings = new HashMap<>(); // 根据offset索引映射
 
     @AllArgsConstructor
     @Data
@@ -29,6 +29,7 @@ public class Indexer {
     }
 
     public static void addEntry(String topic, int offset, int length) {
+        // 按topic创建, 一个topic创建一次
         Entry entry = new Entry(offset, length);
         indexers.add(topic, entry);
         mappings.put(offset, entry);

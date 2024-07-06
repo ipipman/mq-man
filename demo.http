@@ -11,6 +11,15 @@ Content-Type: application/json
   "body":"{\"id\":5,\"item\":\"item0\",\"price\":0.0}"
 }
 
+### 发送一个消息 im.order
+POST http://localhost:8765/mq/send?t=im.order&cid=a
+Content-Type: application/json
+
+{
+  "body":"{\"id\":5,\"item\":\"item0\",\"price\":0.0}"
+}
+
+
 ### 接收一个消息
 GET http://localhost:8765/mq/receive?t=cn.ipman.test&cid=a
 
