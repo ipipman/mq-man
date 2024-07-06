@@ -30,13 +30,6 @@ public class IMConsumer<T> {
     String topic;
 
     /**
-     * 消息队列对象。
-     * 用于具体的消息消费操作。
-     */
-    IMQueue queue;
-
-
-    /**
      * 构造函数，初始化消息消费者。
      *
      * @param broker 消息中间件代理对象。
@@ -55,19 +48,12 @@ public class IMConsumer<T> {
      */
     public void subscribe(String topic) {
         this.topic = topic;
-        this.queue = broker.find(topic);
-        if (queue == null) throw new RuntimeException("topic not found");
+        broker.sub(topic, this.id);
     }
 
-    /**
-     * 从消息队列中轮询消息。
-     * 如果在指定超时时间内没有消息可用，则返回null。
-     *
-     * @param timeout 超时时间，单位为毫秒。
-     * @return 消息对象，如果队列为空则返回null。
-     */
-    public IMMessage<T> poll(long timeout) {
-        return queue.poll(timeout);
+
+    public IMMessage<T> receive(String topic) {
+        return broker.recv(topic, this.id);
     }
 
     /**
@@ -77,7 +63,7 @@ public class IMConsumer<T> {
      * @param listener 消息监听器。
      */
     public void listen(IMListener<T> listener) {
-        queue.addListen(listener);
+
     }
 
 }

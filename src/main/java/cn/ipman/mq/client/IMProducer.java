@@ -26,19 +26,8 @@ public class IMProducer {
         this.broker = broker;
     }
 
-    /**
-     * 向指定主题发送消息。
-     *
-     * @param topic 主题名称。消息将被发送到此主题。
-     * @param message 要发送的消息对象。
-     * @return 如果消息发送成功则返回true；否则返回false。
-     * @throws RuntimeException 如果找不到指定的主题，则抛出运行时异常。
-     */
+
     public boolean send(String topic, IMMessage<?> message) {
-        // 通过消息代理按主题定位消息队列
-        IMQueue queue = broker.find(topic);
-        if (queue == null) throw new RuntimeException("topic not found");
-        // 向找到的消息队列发送消息，并返回发送操作的结果
-        return queue.send(message);
+        return broker.send(message);
     }
 }

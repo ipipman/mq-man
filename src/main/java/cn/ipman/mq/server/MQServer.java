@@ -2,10 +2,10 @@ package cn.ipman.mq.server;
 
 import cn.ipman.mq.model.IMMessage;
 import cn.ipman.mq.model.Result;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * MQ server.
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @Author IpMan
  * @Date 2024/6/30 20:17
  */
-@Controller
+@RestController
 @RequestMapping("/mq")
 public class MQServer {
 

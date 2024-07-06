@@ -12,30 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class IMBroker {
 
-    /**
-     * 使用并发哈希映射存储主题名到消息队列的映射，确保线程安全及高并发访问。
-     */
-    Map<String, IMQueue> mqMapping = new ConcurrentHashMap<>(64);
 
-    /**
-     * 根据主题查找已存在的消息队列。
-     *
-     * @param topic 主题名称
-     * @return 对应的消息队列，若不存在则返回null
-     */
-    public IMQueue find(String topic) {
-        return mqMapping.get(topic);
-    }
-
-    /**
-     * 为指定主题创建新的消息队列，如该队列尚不存在。
-     *
-     * @param topic 主题名称
-     * @return 新创建的或已存在的消息队列
-     */
-    public IMQueue createTopic(String topic) {
-        return mqMapping.putIfAbsent(topic, new IMQueue(topic));
-    }
+    public static String brokerUrl = "localhost:8765/mq";
 
     /**
      * 创建一个新的生产者实例。
