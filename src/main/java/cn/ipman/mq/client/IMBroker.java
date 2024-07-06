@@ -1,5 +1,7 @@
 package cn.ipman.mq.client;
 
+import cn.ipman.mq.model.IMMessage;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date 2024/6/29 19:44
  */
 public class IMBroker {
-
 
     public static String brokerUrl = "localhost:8765/mq";
 
@@ -36,4 +37,12 @@ public class IMBroker {
         return consumer;
     }
 
+    public boolean send(String topic, IMMessage<?> message) {
+    }
+
+    public <T> IMMessage<T> receive(String topic, String id) {
+    }
+
+    public void subscribe(String topic, String id) {
+    }
 }

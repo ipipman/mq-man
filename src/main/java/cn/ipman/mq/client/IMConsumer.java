@@ -48,12 +48,12 @@ public class IMConsumer<T> {
      */
     public void subscribe(String topic) {
         this.topic = topic;
-        broker.sub(topic, this.id);
+        broker.subscribe(topic, this.id);
     }
 
 
     public IMMessage<T> receive(String topic) {
-        return broker.recv(topic, this.id);
+        return broker.receive(topic, this.id);
     }
 
     /**

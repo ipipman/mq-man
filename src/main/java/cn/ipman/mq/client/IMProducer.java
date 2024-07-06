@@ -28,6 +28,6 @@ public class IMProducer {
 
 
     public boolean send(String topic, IMMessage<?> message) {
-        return broker.send(message);
+        return broker.send(topic, message);
     }
 }
