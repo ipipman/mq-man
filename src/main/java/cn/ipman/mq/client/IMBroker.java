@@ -3,8 +3,15 @@ package cn.ipman.mq.client;
 import cn.ipman.mq.model.Message;
 import cn.ipman.mq.model.Result;
 import cn.ipman.mq.utils.HttpUtils;
+import cn.ipman.mq.utils.ThreadUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import lombok.Getter;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 消息代理类，负责管理消息队列并提供生产者与消费者创建方法。
@@ -15,7 +22,37 @@ import com.alibaba.fastjson.TypeReference;
  */
 public class IMBroker {
 
+    @Getter
+    public static IMBroker Default = new IMBroker();
+
     public static String brokerUrl = "http://localhost:8765/mq";
+
+    static {
+        init();
+    }
+
+    public static void init() {
+        // 定时轮询消息队列，并调用监听器处理消息
+        ThreadUtils.getDefault().init(1);
+        ThreadUtils.getDefault().schedule(() -> {
+            MultiValueMap<String, IMConsumer<?>> consumers = getDefault().consumers;
+            // 遍历所有topic下的消费者, 分别取server端获取数据, 并调用监听器处理消息
+            consumers.forEach((topic, c) -> {
+                c.forEach(consumer -> {
+                    Message<?> receive = consumer.receive(topic);
+                    if (receive == null) return;
+                    try {
+                        // 通知监听器处理消息
+                        consumer.listener.onMessage(receive);
+                        consumer.ack(topic, receive);
+                    } catch (Exception e) {
+                        //todo
+                    }
+                });
+            });
+        }, 100, 100);
+    }
+
 
     /**
      * 创建一个新的生产者实例。
@@ -40,6 +77,7 @@ public class IMBroker {
 
     public boolean send(String topic, Message<?> message) {
         System.out.println(" ==>> send topic/message: " + topic + "/" + message);
+        System.out.println(JSON.toJSONString(message));
         Result<String> result = HttpUtils.httpPost(JSON.toJSONString(message),
                 brokerUrl + "/send?t=" + topic, new TypeReference<Result<String>>() {
                 });
@@ -83,5 +121,14 @@ public class IMBroker {
         System.out.println(" ==>> ack result: " + result);
         return result.getCode() == 1;
     }
+
+
+    // 所有consumer
+    final MultiValueMap<String, IMConsumer<?>> consumers = new LinkedMultiValueMap<>();
+
+    public void addConsumer(String topic, IMConsumer<?> consumer) {
+        consumers.add(topic, consumer);
+    }
+
 
 }

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * MQ server.
  *
@@ -30,6 +32,16 @@ public class MQServer {
                                       @RequestParam("cid") String consumerId) {
         return Result.msg(MessageQueue.receive(topic, consumerId));
     }
+
+
+    // receive
+    @RequestMapping("/batch-receive")
+    public Result<List<Message<?>>> batchReceive(@RequestParam("t") String topic,
+                                     @RequestParam("cid") String consumerId,
+                                     @RequestParam(name = "size", required = false, defaultValue = "1000") int size) {
+        return Result.msg(MessageQueue.batchReceive(topic, consumerId, size));
+    }
+
 
     // ack
     @RequestMapping("/ack")

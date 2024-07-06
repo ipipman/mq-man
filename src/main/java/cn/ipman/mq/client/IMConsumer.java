@@ -16,7 +16,7 @@ public class IMConsumer<T> {
 
     static AtomicInteger CID = new AtomicInteger(0);
 
-    private String id;
+    String id;
 
     /**
      * 消息中间件代理对象。
@@ -73,9 +73,14 @@ public class IMConsumer<T> {
      *
      * @param listener 消息监听器。
      */
-    public void listen(IMListener<T> listener) {
-
+    public void listen(String topic, IMListener<?> listener) {
+        this.listener = listener;
+        broker.addConsumer(topic, this);
     }
+
+
+    public IMListener<?> listener;
+
 
 
 }

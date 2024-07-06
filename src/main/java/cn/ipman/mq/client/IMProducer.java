@@ -26,7 +26,6 @@ public class IMProducer {
         this.broker = broker;
     }
 
-
     public boolean send(String topic, Message<?> message) {
         return broker.send(topic, message);
     }

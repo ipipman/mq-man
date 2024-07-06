@@ -3,6 +3,8 @@ package cn.ipman.mq.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Result for MQServer.
  *
@@ -20,12 +22,16 @@ public class Result<T> {
         return new Result<>(1, "OK");
     }
 
-    public static Result<Message<?>> msg(String message) {
-        return new Result<>(1, Message.createMessage(message, null));
-    }
+//    public static Result<Message<?>> msg(String message) {
+//        return new Result<>(1, Message.createMessage(message, null));
+//    }
 
     public static Result<Message<?>> msg(Message<?> message) {
         return new Result<>(1, message);
+    }
+
+    public static Result<List<Message<?>>> msg(List<Message<?>> messages) {
+        return new Result<>(1, messages);
     }
 
     public static Result<String> ok(String msg) {

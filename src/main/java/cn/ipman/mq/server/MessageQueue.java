@@ -2,7 +2,9 @@ package cn.ipman.mq.server;
 
 import cn.ipman.mq.model.Message;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +33,28 @@ public class MessageQueue {
 
     public MessageQueue(String topic) {
         this.topic = topic;
+    }
+
+    public static List<Message<?>> batchReceive(String topic, String consumerId, int size) {
+        MessageQueue messageQueue = queues.get(topic);
+        if (messageQueue == null) throw new RuntimeException("topic not found");
+        if (messageQueue.subscriptions.containsKey(consumerId)) {
+            // 拿到偏移量,再获取数据
+            int idx = messageQueue.subscriptions.get(consumerId).getOffset();
+            int offset = idx + 1;  // 拿到的消息应该是, 在offset基础上+1
+            List<Message<?>> result = new ArrayList<>();
+            Message<?> receive = messageQueue.receive(offset);
+            // 如果能拿到数据, 并且不超过batch size的限制时
+            while (receive != null) {
+                result.add(receive);
+                if (result.size() >= size) break;
+                receive = messageQueue.receive(offset);
+            }
+            System.out.println(" ===>> batch: topic/cid/size = " + topic + "/" + consumerId + "/" + idx + "/" + result.size());
+            System.out.println(" ===>> batch: last message = " + receive);
+            return result;
+        }
+        throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
     }
 
     public int send(Message<?> message) {
@@ -85,7 +109,7 @@ public class MessageQueue {
         if (messageQueue.subscriptions.containsKey(consumerId)) {
             return messageQueue.receive(idx);
         }
-        throw new RuntimeException("subscriptions not found for topic/consumerId" + topic + "/" + consumerId);
+        throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
     }
 
     // 使用此方法，需要手动调用ack, 更新订阅关系的offset
@@ -100,7 +124,7 @@ public class MessageQueue {
             System.out.println(" ===>> receive: message = " + receive);
             return receive;
         }
-        throw new RuntimeException("subscriptions not found for topic/consumerId" + topic + "/" + consumerId);
+        throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
     }
 
 
@@ -118,7 +142,7 @@ public class MessageQueue {
             }
             return -1;
         }
-        throw new RuntimeException("subscriptions not found for topic/consumerId" + topic + "/" + consumerId);
+        throw new RuntimeException("subscriptions not found for topic/consumerId " + topic + "/" + consumerId);
     }
 
 
