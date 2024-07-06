@@ -1,7 +1,7 @@
 package cn.ipman.mq.client;
 
 
-import cn.ipman.mq.model.IMMessage;
+import cn.ipman.mq.model.Message;
 
 public interface IMListener<T> {
 
@@ -14,5 +14,5 @@ public interface IMListener<T> {
      * @param message 接收到的消息对象。消息对象封装了消息的详细信息，如消息内容、消息类型等，监听器通过该参数获取并处理消息。
      *                使用泛型<? extends T>来确保消息类型与监听器处理的类型相匹配或其子类型，提高了代码的灵活性。
      */
-    void onMessage(IMMessage<? extends T> message);
+    void onMessage(Message<? extends T> message);
 }

@@ -1,6 +1,6 @@
 package cn.ipman.mq.client;
 
-import cn.ipman.mq.model.IMMessage;
+import cn.ipman.mq.model.Message;
 import cn.ipman.mq.model.Result;
 import cn.ipman.mq.utils.HttpUtils;
 import com.alibaba.fastjson.JSON;
@@ -38,7 +38,7 @@ public class IMBroker {
         return consumer;
     }
 
-    public boolean send(String topic, IMMessage<?> message) {
+    public boolean send(String topic, Message<?> message) {
         System.out.println(" ==>> send topic/message: " + topic + "/" + message);
         Result<String> result = HttpUtils.httpPost(JSON.toJSONString(message),
                 brokerUrl + "/send?t=" + topic, new TypeReference<Result<String>>() {
@@ -56,13 +56,13 @@ public class IMBroker {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> IMMessage<T> receive(String topic, String consumerId) {
+    public <T> Message<T> receive(String topic, String consumerId) {
         System.out.println(" ==>> receive topic/cid: " + topic + "/" + consumerId);
-        Result<IMMessage<String>> result = HttpUtils.httpGet(brokerUrl + "/receive?t=" + topic + "&cid=" + consumerId,
-                new TypeReference<Result<IMMessage<String>>>() {
+        Result<Message<String>> result = HttpUtils.httpGet(brokerUrl + "/receive?t=" + topic + "&cid=" + consumerId,
+                new TypeReference<Result<Message<String>>>() {
                 });
         System.out.println(" ==>> receive result: " + result);
-        return (IMMessage<T>) result.getData();
+        return (Message<T>) result.getData();
     }
 
     public void unSubscribe(String topic, String consumerId) {
@@ -73,5 +73,15 @@ public class IMBroker {
         System.out.println(" ==>> unSubscribe result: " + result);
     }
 
+
+    public boolean ack(String topic, String consumerId, int offset) {
+        System.out.println(" ==>> ack topic/cid/offset: " + topic + "/" + consumerId + "/" + offset);
+        Result<String> result = HttpUtils.httpGet(
+                brokerUrl + "/ack?t=" + topic + "&cid=" + consumerId + "&offset=" + offset,
+                new TypeReference<Result<String>>() {
+                });
+        System.out.println(" ==>> ack result: " + result);
+        return result.getCode() == 1;
+    }
 
 }

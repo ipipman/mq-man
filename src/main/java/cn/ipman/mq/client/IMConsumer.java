@@ -1,6 +1,6 @@
 package cn.ipman.mq.client;
 
-import cn.ipman.mq.model.IMMessage;
+import cn.ipman.mq.model.Message;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,9 +50,21 @@ public class IMConsumer<T> {
     }
 
     @SuppressWarnings("all")
-    public IMMessage<T> receive(String topic) {
-        IMMessage<T> receive = broker.receive(topic, this.id);
+    public Message<T> receive(String topic) {
+        Message<T> receive = broker.receive(topic, this.id);
         return receive;
+    }
+
+
+    public boolean ack(String topic, int offset) {
+        return broker.ack(topic, this.id, offset);
+    }
+
+
+    public boolean ack(String topic, Message<?> message) {
+        // 从header里获取offset
+        int offset = Integer.parseInt(message.getHeaders().get("X-offset"));
+        return ack(topic, offset);
     }
 
     /**
@@ -64,5 +76,6 @@ public class IMConsumer<T> {
     public void listen(IMListener<T> listener) {
 
     }
+
 
 }

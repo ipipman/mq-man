@@ -20,11 +20,11 @@ public class Result<T> {
         return new Result<>(1, "OK");
     }
 
-    public static Result<IMMessage<?>> msg(String message) {
-        return new Result<>(1, IMMessage.createMessage(message, null));
+    public static Result<Message<?>> msg(String message) {
+        return new Result<>(1, Message.createMessage(message, null));
     }
 
-    public static Result<IMMessage<?>> msg(IMMessage<?> message) {
+    public static Result<Message<?>> msg(Message<?> message) {
         return new Result<>(1, message);
     }
 

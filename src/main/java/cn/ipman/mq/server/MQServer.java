@@ -1,6 +1,6 @@
 package cn.ipman.mq.server;
 
-import cn.ipman.mq.model.IMMessage;
+import cn.ipman.mq.model.Message;
 import cn.ipman.mq.model.Result;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,14 +20,14 @@ public class MQServer {
     // send
     @RequestMapping("/send")
     public Result<String> send(@RequestParam("t") String topic,
-                               @RequestBody IMMessage<String> message) {
+                               @RequestBody Message<String> message) {
         return Result.ok("msg" + MessageQueue.send(topic, message));
     }
 
     // receive
     @RequestMapping("/receive")
-    public Result<IMMessage<?>> receive(@RequestParam("t") String topic,
-                                        @RequestParam("cid") String consumerId) {
+    public Result<Message<?>> receive(@RequestParam("t") String topic,
+                                      @RequestParam("cid") String consumerId) {
         return Result.msg(MessageQueue.receive(topic, consumerId));
     }
 

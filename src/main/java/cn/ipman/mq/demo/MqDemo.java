@@ -2,7 +2,7 @@ package cn.ipman.mq.demo;
 
 import cn.ipman.mq.client.IMBroker;
 import cn.ipman.mq.client.IMConsumer;
-import cn.ipman.mq.model.IMMessage;
+import cn.ipman.mq.model.Message;
 import cn.ipman.mq.client.IMProducer;
 import com.alibaba.fastjson.JSON;
 import lombok.SneakyThrows;
@@ -45,13 +45,14 @@ public class MqDemo {
         // ------------ 生产、消费 ------------------
         for (int i = 0; i < 10; i++) {
             Order order = new Order(ids, "item" + ids, 100 * ids);
-            producer.send(topic, new IMMessage<>(ids++, JSON.toJSONString(order), null));
+            producer.send(topic, new Message<>(ids++, JSON.toJSONString(order), null));
             System.out.println("send ok => " + order);
         }
 
         for (int i = 0; i < 10; i++) {
-            IMMessage<Order> message = (IMMessage<Order>) consumer1.receive(topic);
-            System.out.println("poll ok => " + message);
+            Message<Order> message = (Message<Order>) consumer1.receive(topic);
+            System.out.println("poll ok => " + message); // 做业务处理...
+            consumer1.ack(topic, message);
         }
 
         while (true) {
@@ -62,17 +63,18 @@ public class MqDemo {
             }
             if (c == 'p') { // 生产
                 Order order = new Order(ids, "item" + ids, 100 * ids);
-                producer.send(topic, new IMMessage<>(ids++, JSON.toJSONString(order), null));
+                producer.send(topic, new Message<>(ids++, JSON.toJSONString(order), null));
                 System.out.println("send ok => " + order);
             }
             if (c == 'c') { // 消费
-                IMMessage<Order> message = (IMMessage<Order>) consumer1.receive(topic);
+                Message<Order> message = (Message<Order>) consumer1.receive(topic);
                 System.out.println("poll ok => " + message.getBody());
+                consumer1.ack(topic, message);
             }
             if (c == 'a') { // 生产10个
                 for (int i = 0; i < 10; i++) {
                     Order order = new Order(ids, "item" + ids, 100 * ids);
-                    producer.send(topic, new IMMessage<>(ids++, JSON.toJSONString(order), null));
+                    producer.send(topic, new Message<>(ids++, JSON.toJSONString(order), null));
                 }
                 System.out.println("send 10 orders... ");
             }

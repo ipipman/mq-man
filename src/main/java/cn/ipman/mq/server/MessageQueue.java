@@ -1,6 +1,6 @@
 package cn.ipman.mq.server;
 
-import cn.ipman.mq.model.IMMessage;
+import cn.ipman.mq.model.Message;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,22 +26,23 @@ public class MessageQueue {
     Map<String, MessageSubscription> subscriptions = new HashMap<>();
 
     String topic;
-    IMMessage<?>[] queue = new IMMessage[1024 * 10];  // 用来存储message
-    private int index = 0;
+    Message<?>[] queue = new Message[1024 * 10];  // 用来存储message
+    private int index = 0; // 消息最后一次写入的位置
 
     public MessageQueue(String topic) {
         this.topic = topic;
     }
 
-    public int send(IMMessage<?> message) {
+    public int send(Message<?> message) {
         if (index >= queue.length) { // 写满了~
             return -1;
         }
+        message.getHeaders().put("X-offset", String.valueOf(index)); // 设置偏移量
         queue[index++] = message;
         return index;
     }
 
-    public IMMessage<?> receive(int idx) {
+    public Message<?> receive(int idx) {
         if (idx <= index) return queue[idx]; // 按位置拿数据
         return null;
     }
@@ -71,14 +72,14 @@ public class MessageQueue {
         messageQueue.unsubscribe(subscription);
     }
 
-    public static int send(String topic, IMMessage<String> message) {
+    public static int send(String topic, Message<String> message) {
         MessageQueue messageQueue = queues.get(topic);
         System.out.println(" ===>> send: topic/message = " + topic + "/" + message);
         if (messageQueue == null) throw new RuntimeException("topic not found");
         return messageQueue.send(message);
     }
 
-    public static IMMessage<?> receive(String topic, String consumerId, int idx) {
+    public static Message<?> receive(String topic, String consumerId, int idx) {
         MessageQueue messageQueue = queues.get(topic);
         if (messageQueue == null) throw new RuntimeException("topic not found");
         if (messageQueue.subscriptions.containsKey(consumerId)) {
@@ -88,12 +89,13 @@ public class MessageQueue {
     }
 
     // 使用此方法，需要手动调用ack, 更新订阅关系的offset
-    public static IMMessage<?> receive(String topic, String consumerId) {
+    public static Message<?> receive(String topic, String consumerId) {
         MessageQueue messageQueue = queues.get(topic);
         if (messageQueue == null) throw new RuntimeException("topic not found");
         if (messageQueue.subscriptions.containsKey(consumerId)) {
+            // 拿到偏移量,再获取数据
             int idx = messageQueue.subscriptions.get(consumerId).getOffset();
-            IMMessage<?> receive = messageQueue.receive(idx + 1); // 拿到的消息应该是, 在offset基础上+1
+            Message<?> receive = messageQueue.receive(idx + 1); // 拿到的消息应该是, 在offset基础上+1
             System.out.println(" ===>> receive: topic/cid/idx = " + topic + "/" + consumerId + "/" + idx);
             System.out.println(" ===>> receive: message = " + receive);
             return receive;

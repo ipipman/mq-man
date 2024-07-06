@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -16,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IMMessage<T> {
+public class Message<T> {
 
     // 消息ID
     static AtomicLong MID = new AtomicLong(0);
@@ -31,11 +32,7 @@ public class IMMessage<T> {
      */
     private T body;
 
-    /**
-     * 消息头，用于存储关于消息的额外系统信息。
-     * 例如，它可以用来存储系统属性如消息版本号,
-     */
-    private Map<String, String> headers;
+    private Map<String, String> headers = new HashMap<>();
 
     //private String topic;
     //private Map<String, String> properties; // 业务属性
@@ -44,8 +41,8 @@ public class IMMessage<T> {
         return MID.getAndIncrement();
     }
 
-    public static IMMessage<?> createMessage(String body, Map<String, String> headers) {
-        return new IMMessage<>(getId(), body, headers);
+    public static Message<?> createMessage(String body, Map<String, String> headers) {
+        return new Message<>(getId(), body, headers);
     }
 
 }

@@ -1,6 +1,6 @@
 package cn.ipman.mq.client;
 
-import cn.ipman.mq.model.IMMessage;
+import cn.ipman.mq.model.Message;
 
 /**
  * 消息队列生产者类。
@@ -27,7 +27,7 @@ public class IMProducer {
     }
 
 
-    public boolean send(String topic, IMMessage<?> message) {
+    public boolean send(String topic, Message<?> message) {
         return broker.send(topic, message);
     }
 }
