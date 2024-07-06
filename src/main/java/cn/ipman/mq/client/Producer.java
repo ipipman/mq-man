@@ -9,20 +9,20 @@ import cn.ipman.mq.model.Message;
  * @Author IpMan
  * @Date 2024/6/29 19:41
  */
-public class IMProducer {
+public class Producer {
 
     /**
      * 消息代理实例。
      * 用于定位和与消息队列通信。
      */
-    IMBroker broker;
+    Broker broker;
 
     /**
      * 构造方法。
      *
      * @param broker 消息代理实例。
      */
-    public IMProducer(IMBroker broker) {
+    public Producer(Broker broker) {
         this.broker = broker;
     }
 

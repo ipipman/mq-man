@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Author IpMan
  * @Date 2024/6/29 19:55
  */
-public class IMConsumer<T> {
+public class Consumer<T> {
 
     static AtomicInteger CID = new AtomicInteger(0);
 
@@ -22,14 +22,14 @@ public class IMConsumer<T> {
      * 消息中间件代理对象。
      * 用于与消息中间件进行交互。
      */
-    IMBroker broker;
+    Broker broker;
 
     /**
      * 构造函数，初始化消息消费者。
      *
      * @param broker 消息中间件代理对象。
      */
-    public IMConsumer(IMBroker broker) {
+    public Consumer(Broker broker) {
         this.broker = broker;
         this.id = "CID" + CID.getAndIncrement();
     }
@@ -73,14 +73,13 @@ public class IMConsumer<T> {
      *
      * @param listener 消息监听器。
      */
-    public void listen(String topic, IMListener<?> listener) {
+    public void listen(String topic, Listener<?> listener) {
         this.listener = listener;
         broker.addConsumer(topic, this);
     }
 
 
-    public IMListener<?> listener;
-
+    public Listener<?> listener;
 
 
 }

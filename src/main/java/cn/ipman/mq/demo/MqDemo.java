@@ -1,9 +1,9 @@
 package cn.ipman.mq.demo;
 
-import cn.ipman.mq.client.IMBroker;
-import cn.ipman.mq.client.IMConsumer;
+import cn.ipman.mq.client.Broker;
+import cn.ipman.mq.client.Consumer;
 import cn.ipman.mq.model.Message;
-import cn.ipman.mq.client.IMProducer;
+import cn.ipman.mq.client.Producer;
 import com.alibaba.fastjson.JSON;
 import lombok.SneakyThrows;
 
@@ -22,13 +22,13 @@ public class MqDemo {
 
         // 创建broker, 绑定topic
         String topic = "im.order";
-        IMBroker broker = IMBroker.getDefault();
+        Broker broker = Broker.getDefault();
 
         // 通过broker创建producer和consumer
-        IMProducer producer = broker.createProducer();
+        Producer producer = broker.createProducer();
 
         // consumer-0
-        IMConsumer<?> consumer = broker.createConsumer(topic);
+        Consumer<?> consumer = broker.createConsumer(topic);
         // 测试listen监听topic
         consumer.listen(topic, message -> {
             System.out.println("listener onMessage => " + message);

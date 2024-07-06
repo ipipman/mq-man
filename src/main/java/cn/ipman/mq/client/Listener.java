@@ -4,7 +4,7 @@ package cn.ipman.mq.client;
 import cn.ipman.mq.model.Message;
 
 @FunctionalInterface
-public interface IMListener<T> {
+public interface Listener<T> {
 
     /**
      * 当收到消息时调用此方法。
