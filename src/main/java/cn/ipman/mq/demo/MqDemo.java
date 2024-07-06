@@ -29,13 +29,13 @@ public class MqDemo {
 
         // consumer-0
         Consumer<?> consumer = broker.createConsumer(topic);
-        // 测试listen监听topic
-        consumer.listen(topic, message -> {
-            System.out.println("listener onMessage => " + message);
-        });
+//        // 测试listen监听topic
+//        consumer.listen(topic, message -> {
+//            System.out.println("listener onMessage => " + message);
+//        });
 
         // consumer-1
-//        IMConsumer<?> consumer1 = broker.createConsumer(topic);
+        Consumer<?> consumer1 = broker.createConsumer(topic);
         // ------------ 生产、消费 ------------------
         for (int i = 0; i < 10; i++) {
             Order order = new Order(ids, "item" + ids, 100 * ids);
@@ -43,11 +43,11 @@ public class MqDemo {
             System.out.println("send ok => " + order);
         }
 
-//        for (int i = 0; i < 10; i++) {
-//            Message<Order> message = (Message<Order>) consumer1.receive(topic);
-//            System.out.println("poll ok => " + message); // 做业务处理...
-//            consumer1.ack(topic, message);
-//        }
+        for (int i = 0; i < 10; i++) {
+            Message<Order> message = (Message<Order>) consumer1.receive(topic);
+            System.out.println("poll ok => " + message); // 做业务处理...
+            consumer1.ack(topic, message);
+        }
 
         while (true) {
             char c = (char) System.in.read();

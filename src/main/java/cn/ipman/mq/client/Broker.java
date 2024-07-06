@@ -36,6 +36,7 @@ public class Broker {
             // 遍历所有topic下的消费者, 分别取server端获取数据, 并调用监听器处理消息
             consumers.forEach((topic, c) -> {
                 c.forEach(consumer -> {
+                    System.out.println("lllll");
                     Message<?> receive = consumer.receive(topic);
                     if (receive == null) return;
                     try {
