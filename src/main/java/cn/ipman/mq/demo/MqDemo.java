@@ -14,7 +14,6 @@ import lombok.SneakyThrows;
  */
 public class MqDemo {
 
-
     @SneakyThrows
     @SuppressWarnings("unchecked")
     public static void main(String[] args) {

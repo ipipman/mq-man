@@ -2,9 +2,7 @@ package cn.ipman.mq.server;
 
 import cn.ipman.mq.model.IMMessage;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
