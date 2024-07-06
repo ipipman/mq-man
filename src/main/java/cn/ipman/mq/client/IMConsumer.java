@@ -25,11 +25,6 @@ public class IMConsumer<T> {
     IMBroker broker;
 
     /**
-     * 订阅的主题。
-     */
-    String topic;
-
-    /**
      * 构造函数，初始化消息消费者。
      *
      * @param broker 消息中间件代理对象。
@@ -47,13 +42,17 @@ public class IMConsumer<T> {
      * @throws RuntimeException 如果主题不存在，则抛出运行时异常。
      */
     public void subscribe(String topic) {
-        this.topic = topic;
         broker.subscribe(topic, this.id);
     }
 
+    public void unSubscribe(String topic) {
+        broker.unSubscribe(topic, this.id);
+    }
 
+    @SuppressWarnings("all")
     public IMMessage<T> receive(String topic) {
-        return broker.receive(topic, this.id);
+        IMMessage<T> receive = broker.receive(topic, this.id);
+        return receive;
     }
 
     /**

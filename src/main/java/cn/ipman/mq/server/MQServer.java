@@ -20,9 +20,8 @@ public class MQServer {
     // send
     @RequestMapping("/send")
     public Result<String> send(@RequestParam("t") String topic,
-                               @RequestParam("cid") String consumerId,
                                @RequestBody IMMessage<String> message) {
-        return Result.ok("msg" + MessageQueue.send(topic, consumerId, message));
+        return Result.ok("msg" + MessageQueue.send(topic, message));
     }
 
     // receive

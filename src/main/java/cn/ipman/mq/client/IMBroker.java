@@ -1,9 +1,10 @@
 package cn.ipman.mq.client;
 
 import cn.ipman.mq.model.IMMessage;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import cn.ipman.mq.model.Result;
+import cn.ipman.mq.utils.HttpUtils;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 
 /**
  * 消息代理类，负责管理消息队列并提供生产者与消费者创建方法。
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class IMBroker {
 
-    public static String brokerUrl = "localhost:8765/mq";
+    public static String brokerUrl = "http://localhost:8765/mq";
 
     /**
      * 创建一个新的生产者实例。
@@ -38,11 +39,39 @@ public class IMBroker {
     }
 
     public boolean send(String topic, IMMessage<?> message) {
+        System.out.println(" ==>> send topic/message: " + topic + "/" + message);
+        Result<String> result = HttpUtils.httpPost(JSON.toJSONString(message),
+                brokerUrl + "/send?t=" + topic, new TypeReference<Result<String>>() {
+                });
+        System.out.println(" ==>> send result: " + result);
+        return result.getCode() == 1;
     }
 
-    public <T> IMMessage<T> receive(String topic, String id) {
+    public void subscribe(String topic, String consumerId) {
+        System.out.println(" ==>> subscribe topic/consumerID: " + topic + "/" + consumerId);
+        Result<String> result = HttpUtils.httpGet(brokerUrl + "/sub?t=" + topic + "&cid=" + consumerId,
+                new TypeReference<Result<String>>() {
+                });
+        System.out.println(" ==>> subscribe result: " + result);
     }
 
-    public void subscribe(String topic, String id) {
+    @SuppressWarnings("unchecked")
+    public <T> IMMessage<T> receive(String topic, String consumerId) {
+        System.out.println(" ==>> receive topic/cid: " + topic + "/" + consumerId);
+        Result<IMMessage<String>> result = HttpUtils.httpGet(brokerUrl + "/receive?t=" + topic + "&cid=" + consumerId,
+                new TypeReference<Result<IMMessage<String>>>() {
+                });
+        System.out.println(" ==>> receive result: " + result);
+        return (IMMessage<T>) result.getData();
     }
+
+    public void unSubscribe(String topic, String consumerId) {
+        System.out.println(" ==>> unSubscribe topic/cid: " + topic + "/" + consumerId);
+        Result<String> result = HttpUtils.httpGet(brokerUrl + "/unsub?t=" + topic + "&cid=" + consumerId,
+                new TypeReference<Result<String>>() {
+                });
+        System.out.println(" ==>> unSubscribe result: " + result);
+    }
+
+
 }
