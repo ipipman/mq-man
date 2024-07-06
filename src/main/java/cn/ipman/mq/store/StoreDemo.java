@@ -1,5 +1,9 @@
 package cn.ipman.mq.store;
 
+import cn.ipman.mq.model.Message;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -42,10 +46,14 @@ public class StoreDemo {
 
             for (int i = 0; i < 10; i++) {
                 System.out.println(i + " -> " + mappedByteBuffer.position()); // offset
-                mappedByteBuffer.put(StandardCharsets.UTF_8.encode(i + ":" + content));
+                @SuppressWarnings("unchecked")
+                Message<String> message = (Message<String>) Message.createMessage(content, null);
+                String msg = JSON.toJSONString(message);
+                Indexer.addEntry("im.order", mappedByteBuffer.position(), msg.getBytes(StandardCharsets.UTF_8).length);
+                mappedByteBuffer.put(StandardCharsets.UTF_8.encode(msg));
             }
 
-            length += 2;
+            //length += 2;
 
             ByteBuffer readOnlyBuffer = mappedByteBuffer.asReadOnlyBuffer();
             Scanner sc = new Scanner(System.in);
@@ -53,11 +61,22 @@ public class StoreDemo {
                 String line = sc.nextLine();
                 if (line.equals("q")) break;
                 System.out.println(" IN = " + line);
-                int pos = Integer.parseInt(line);
-                readOnlyBuffer.position(pos * length);
-                byte[] bytes = new byte[53];
-                readOnlyBuffer.get(bytes, 0, length);
-                System.out.println("read only ==>> " + new String(bytes, StandardCharsets.UTF_8));
+
+                int id = Integer.parseInt(line);
+
+                Indexer.Entry entry = Indexer.getEntry("im.order", id);
+                readOnlyBuffer.position(entry.getOffset());
+
+                int len = entry.getLength();
+                byte[] bytes = new byte[len];
+                readOnlyBuffer.get(bytes, 0, len);
+
+                String s = new String(bytes, StandardCharsets.UTF_8);
+                System.out.println("read only ==>> " + s);
+                Message<String> message = JSON.parseObject(s, new TypeReference<Message<String>>() {
+                });
+                System.out.println(" message.body = " + message);
+
             }
         }
     }

@@ -1,6 +1,8 @@
 package cn.ipman.mq.server;
 
 import cn.ipman.mq.model.Message;
+import cn.ipman.mq.store.Indexer;
+import cn.ipman.mq.store.MessageStore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,47 +30,54 @@ public class MessageQueue {
     Map<String, MessageSubscription> subscriptions = new HashMap<>();
 
     String topic;
-    Message<?>[] queue = new Message[1024 * 10];  // 用来存储message
-    private int index = 0; // 消息最后一次写入的位置
+
+    MessageStore store;
 
     public MessageQueue(String topic) {
         this.topic = topic;
+        store = new MessageStore(topic);
+        store.init();
     }
 
     public static List<Message<?>> batchReceive(String topic, String consumerId, int size) {
         MessageQueue messageQueue = queues.get(topic);
         if (messageQueue == null) throw new RuntimeException("topic not found");
         if (messageQueue.subscriptions.containsKey(consumerId)) {
-            // 拿到偏移量,再获取数据
-            int idx = messageQueue.subscriptions.get(consumerId).getOffset();
-            int offset = idx + 1;  // 拿到的消息应该是, 在offset基础上+1
+
+            int offset = messageQueue.subscriptions.get(consumerId).getOffset();
+            int nextOffset = 0;
+            if (offset > -1) {
+                Indexer.Entry entry = Indexer.getEntry(topic, offset);
+                if (entry == null) {
+                    return null;
+                }
+                nextOffset = offset + entry.getLength();
+            }
+
             List<Message<?>> result = new ArrayList<>();
-            Message<?> receive = messageQueue.receive(offset);
+            Message<?> receive = messageQueue.receive(nextOffset);
             // 如果能拿到数据, 并且不超过batch size的限制时
             while (receive != null) {
                 result.add(receive);
                 if (result.size() >= size) break;
                 receive = messageQueue.receive(offset);
             }
-            System.out.println(" ===>> batch: topic/cid/size = " + topic + "/" + consumerId + "/" + idx + "/" + result.size());
+            System.out.println(" ===>> batch: topic/cid/size = " + topic + "/" + consumerId + "/" + offset + "/" + result.size());
             System.out.println(" ===>> batch: last message = " + receive);
             return result;
         }
         throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
     }
 
-    public int send(Message<?> message) {
-        if (index >= queue.length) { // 写满了~
-            return -1;
-        }
-        message.getHeaders().put("X-offset", String.valueOf(index)); // 设置偏移量
-        queue[index++] = message;
-        return index;
+    public int send(Message<String> message) {
+        int offset = store.pos();
+        message.getHeaders().put("X-offset", String.valueOf(offset)); // 设置偏移量
+        store.write(message);
+        return offset;
     }
 
-    public Message<?> receive(int idx) {
-        if (idx <= index) return queue[idx]; // 按位置拿数据
-        return null;
+    public Message<?> receive(int offset) {
+        return store.read(offset);
     }
 
     public void subscribe(MessageSubscription subscription) {
@@ -103,11 +112,11 @@ public class MessageQueue {
         return messageQueue.send(message);
     }
 
-    public static Message<?> receive(String topic, String consumerId, int idx) {
+    public static Message<?> receive(String topic, String consumerId, int offset) {
         MessageQueue messageQueue = queues.get(topic);
         if (messageQueue == null) throw new RuntimeException("topic not found");
         if (messageQueue.subscriptions.containsKey(consumerId)) {
-            return messageQueue.receive(idx);
+            return messageQueue.receive(offset);
         }
         throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
     }
@@ -117,10 +126,20 @@ public class MessageQueue {
         MessageQueue messageQueue = queues.get(topic);
         if (messageQueue == null) throw new RuntimeException("topic not found");
         if (messageQueue.subscriptions.containsKey(consumerId)) {
+
+            int offset = messageQueue.subscriptions.get(consumerId).getOffset();
+            int nextOffset = 0;
+            if (offset > -1) {
+                Indexer.Entry entry = Indexer.getEntry(topic, offset);
+                if (entry == null) {
+                    return null;
+                }
+                nextOffset = offset + entry.getLength();
+            }
+
             // 拿到偏移量,再获取数据
-            int idx = messageQueue.subscriptions.get(consumerId).getOffset();
-            Message<?> receive = messageQueue.receive(idx + 1); // 拿到的消息应该是, 在offset基础上+1
-            System.out.println(" ===>> receive: topic/cid/idx = " + topic + "/" + consumerId + "/" + idx);
+            Message<?> receive = messageQueue.receive(nextOffset); // 拿到的消息应该是, 在offset基础上+1
+            System.out.println(" ===>> receive: topic/cid/idx = " + topic + "/" + consumerId + "/" + offset);
             System.out.println(" ===>> receive: message = " + receive);
             return receive;
         }
@@ -135,7 +154,8 @@ public class MessageQueue {
 
         if (messageQueue.subscriptions.containsKey(consumerId)) {
             MessageSubscription subscription = messageQueue.subscriptions.get(consumerId);
-            if (offset > subscription.getOffset() && offset <= messageQueue.index) {
+
+            if (offset > subscription.getOffset() && offset < MessageStore.LEN) {
                 System.out.println(" ===>> ack: topic/cid/offset = " + topic + "/" + consumerId + "/" + offset);
                 subscription.setOffset(offset);
                 return offset;

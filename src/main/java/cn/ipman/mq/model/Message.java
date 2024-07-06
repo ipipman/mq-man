@@ -37,12 +37,12 @@ public class Message<T> {
     //private String topic;
     //private Map<String, String> properties; // 业务属性
 
-    public static long getId() {
+    public static long nextId() {
         return MID.getAndIncrement();
     }
 
     public static Message<?> createMessage(String body, Map<String, String> headers) {
-        return new Message<>(getId(), body, headers);
+        return new Message<>(nextId(), body, headers);
     }
 
 }
