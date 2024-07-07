@@ -69,6 +69,7 @@ public class MQServer {
         return Result.ok();
     }
 
+    // stat
     @RequestMapping("/stat")
     public Result<Statistical> stat(@RequestParam("t") String topic,
                                     @RequestParam("cid") String consumerId) {
