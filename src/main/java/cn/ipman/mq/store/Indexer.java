@@ -19,7 +19,9 @@ public class Indexer {
 
     // 全局的
     static MultiValueMap<String, Entry> indexers = new LinkedMultiValueMap<>();
-    static Map<Integer, Entry> mappings = new HashMap<>(); // 根据offset索引映射
+    static Map<String, Entry> mappings = new HashMap<>(); // 根据offset索引映射
+
+    public final static String OFFSET_PLACEHOLDER = "||__offset__||";
 
     @AllArgsConstructor
     @Data
@@ -28,11 +30,16 @@ public class Indexer {
         int length;  // 消息的长度
     }
 
+    public static String getOffsetKey(String topic, int offset) {
+        return topic + OFFSET_PLACEHOLDER + offset;
+    }
+
+
     public static void addEntry(String topic, int offset, int length) {
         // 按topic创建, 一个topic创建一次
         Entry entry = new Entry(offset, length);
         indexers.add(topic, entry);
-        mappings.put(offset, entry);
+        mappings.put(getOffsetKey(topic, offset), entry);
     }
 
     public static List<Entry> getEntries(String topic) {
@@ -40,7 +47,7 @@ public class Indexer {
     }
 
     public static Entry getEntry(String topic, int offset) {
-        return mappings.get(offset);
+        return mappings.get(getOffsetKey(topic, offset));
     }
 
 }

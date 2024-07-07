@@ -4,6 +4,7 @@ import cn.ipman.mq.model.Message;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import lombok.SneakyThrows;
+import org.apache.catalina.Store;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -14,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Scanner;
 
 /**
  * Description for this class
@@ -70,12 +72,12 @@ public class MessageStore {
 
     public int write(Message<String> message) {
         System.out.println("write position -> " + mappedByteBuffer.position()); // offset
-        String msg = JSON.toJSONString(message);
+        String json = JSON.toJSONString(message);
 
         // 写入header头,方便store初始化时读取所有Message的索引信息
-        int len = msg.getBytes(StandardCharsets.UTF_8).length;
+        int len = json.getBytes(StandardCharsets.UTF_8).length;
         String format = String.format("%010d", len); // 用10个长度表示
-        msg = format + msg;
+        String msg = format + json;
         len = len + 10;
 
         // 写入数据
