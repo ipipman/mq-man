@@ -89,6 +89,7 @@ public class Broker {
      * @param topic 消费的主题。
      * @return 消费者实例。
      */
+    @SuppressWarnings("unused")
     public Consumer<?> createConsumer(String topic) {
         Consumer<?> consumer = new Consumer<>(this);
         consumer.subscribe(topic);
