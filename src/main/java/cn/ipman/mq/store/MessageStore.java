@@ -4,7 +4,6 @@ import cn.ipman.mq.model.Message;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import lombok.SneakyThrows;
-import org.apache.catalina.Store;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -15,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Scanner;
 
 /**
  * Description for this class
@@ -26,7 +24,7 @@ import java.util.Scanner;
 public class MessageStore {
 
     String topic;
-    public static final int LEN = 1024 * 1024; //1MB
+    public static final int LEN = 1024 * 10; //10KB
 
     public MessageStore(String topic) {
         this.topic = topic;
@@ -47,15 +45,26 @@ public class MessageStore {
         mappedByteBuffer = channel
                 .map(FileChannel.MapMode.READ_WRITE, 0, LEN);
 
-        // todo 1、读取索引
-        // TODO: 判断是否有数据,找到数据结尾,  通过 mappedByteBuffer.position() 获取当前偏移量
-        // 读前10位,转成int=len, 看是不是大于0,往后翻len的长度,就是下一条记录,
-        // 重复上一步, 一直到0为止,找到数据的结尾
-        //  mappedByteBuffer.position(init_pos)
 
-        // todo > 10M
-        // 需要创建第二个数据文件,怎么来管理
-
+        // 初始化时判断topic文件中是否已经有了数据, 如果有的话需要将文件指针指向最新位置
+        ByteBuffer buffer = mappedByteBuffer.asReadOnlyBuffer();
+        byte[] header = new byte[10]; // 隐藏头,用来声明单个message的长度
+        buffer.get(header);
+        int offset = 0;
+        while (header[9] > 0) {
+            String trim = new String(header, StandardCharsets.UTF_8).trim();
+            int len = Integer.parseInt(trim) + 10;
+            System.out.println("store init topic = " + topic + ", len = " + len + ", header = " + trim);
+            Indexer.addEntry(topic, offset, len); // 初始化历史数据
+            // 计算下一个position,并尝试读取
+            offset += len;
+            System.out.println(" next = " + offset);
+            buffer.position(offset);
+            buffer.get(header);
+        }
+        buffer.clear();
+        System.out.println("store init topic = " + topic + ", last position = " + offset);
+        mappedByteBuffer.position(offset);
     }
 
 
@@ -63,14 +72,13 @@ public class MessageStore {
         System.out.println("write position -> " + mappedByteBuffer.position()); // offset
         String msg = JSON.toJSONString(message);
 
-        // 1000_1000_10
+        // 写入header头,方便store初始化时读取所有Message的索引信息
         int len = msg.getBytes(StandardCharsets.UTF_8).length;
+        String format = String.format("%010d", len); // 用10个长度表示
+        msg = format + msg;
+        len = len + 10;
 
-        // todo:
-//        String format = String.format("%010d", len);
-//        msg = format + msg;
-//        len += 10;
-
+        // 写入数据
         int position = mappedByteBuffer.position(); // 获取当前偏移量
         Indexer.addEntry(this.topic, position, len);
 
@@ -87,9 +95,9 @@ public class MessageStore {
         ByteBuffer readOnlyBuffer = mappedByteBuffer.asReadOnlyBuffer();
         Indexer.Entry entry = Indexer.getEntry(this.topic, offset);
         if (entry == null) return null;
-        readOnlyBuffer.position(entry.getOffset());
+        readOnlyBuffer.position(entry.getOffset() + 10); // 10是隐藏的header头
 
-        int len = entry.getLength(); // 数据的长度
+        int len = entry.getLength() - 10; // 数据的长度
         byte[] bytes = new byte[len];
         readOnlyBuffer.get(bytes, 0, len);
         String json = new String(bytes, StandardCharsets.UTF_8);
@@ -98,6 +106,7 @@ public class MessageStore {
         Message<String> message = JSON.parseObject(json, new TypeReference<Message<String>>() {
         });
         System.out.println("message.body = " + message);
+        readOnlyBuffer.clear();
         return message;
     }
 
@@ -105,4 +114,24 @@ public class MessageStore {
         return Indexer.getEntries(topic).size();
     }
 
+    public static void main(String[] args) {
+        System.out.println(
+                "{\"body\":\"{\\\"id\\\":0,\\\"item\\\":\\\"item0\\\",\\\"price\\\":0.0}\",\"headers\":{\"X-offset\":\"0\"},\"id\":0}"
+                        .getBytes(StandardCharsets.UTF_8).length);
+
+        String a = "{\"body\":\"{\\\"id\\\":0,\\\"item\\\":\\\"item0\\\",\\\"price\\\":0.0}\",\"headers\":{\"X-offset\":\"98\"},\"id\":0}";
+        String b = "0000000090";
+        String c = b + a;
+        System.out.println(c);
+        System.out.println(c.getBytes(StandardCharsets.UTF_8).length);
+
+        System.out.println("=======> ");
+
+        String e = String.format("%010d", 90);
+        String d = e + a;
+        System.out.println(d);
+        System.out.println(d.getBytes(StandardCharsets.UTF_8).length);
+
+
+    }
 }
