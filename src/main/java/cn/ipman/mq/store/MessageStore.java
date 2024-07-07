@@ -4,7 +4,6 @@ import cn.ipman.mq.model.Message;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import lombok.SneakyThrows;
-import org.apache.catalina.Store;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -15,25 +14,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Scanner;
 
 /**
- * Description for this class
- *
- * @Author IpMan
- * @Date 2024/7/6 20:56
+ * 消息存储类，用于存储和检索消息。
+ * 使用MappedByteBuffer来映射文件到内存，以提高读写效率。
  */
 public class MessageStore {
 
     String topic;
-    public static final int LEN = 1024 * 100; //100KB
+    public static final int LEN = 1024 * 100;  //100KB，每个文件的大小
 
+    /**
+     * 构造函数初始化MessageStore，指定消息的主题。
+     * @param topic 消息主题，用于分类消息。
+     */
     public MessageStore(String topic) {
         this.topic = topic;
     }
 
+    /**
+     * 当前文件的位置
+     */
     MappedByteBuffer mappedByteBuffer = null;
 
+    /**
+     * 初始化消息存储，创建必要的文件和映射内存。
+     */
     @SneakyThrows
     public void init() {
         File file = new File(this.topic + ".dat");
@@ -69,7 +75,11 @@ public class MessageStore {
         mappedByteBuffer.position(offset);
     }
 
-
+    /**
+     * 写入消息到存储。
+     * @param message 要写入的消息对象。
+     * @return 写入消息的起始位置。
+     */
     public int write(Message<String> message) {
         System.out.println("write position -> " + mappedByteBuffer.position()); // offset
         String json = JSON.toJSONString(message);
@@ -88,11 +98,19 @@ public class MessageStore {
         return position;
     }
 
+    /**
+     * 获取当前写位置。
+     * @return 当前的写位置。
+     */
     public int pos() {
         return mappedByteBuffer.position();
     }
 
-
+    /**
+     * 从存储中读取消息。
+     * @param offset 消息的偏移量，从存储的起始位置开始。
+     * @return 读取到的消息对象，如果找不到则返回null。
+     */
     public Message<String> read(int offset) {
         ByteBuffer readOnlyBuffer = mappedByteBuffer.asReadOnlyBuffer();
         Indexer.Entry entry = Indexer.getEntry(this.topic, offset);
@@ -105,6 +123,7 @@ public class MessageStore {
         String json = new String(bytes, StandardCharsets.UTF_8);
         System.out.println("read only ==>> " + json);
 
+        // 反序列化
         Message<String> message = JSON.parseObject(json, new TypeReference<Message<String>>() {
         });
         System.out.println("message.body = " + message);
@@ -112,6 +131,10 @@ public class MessageStore {
         return message;
     }
 
+    /**
+     * 获取当前存储中的消息总数。
+     * @return 消息总数。
+     */
     public int total() {
         return Indexer.getEntries(topic).size();
     }
