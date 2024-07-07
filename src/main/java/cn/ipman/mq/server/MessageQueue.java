@@ -142,6 +142,7 @@ public class MessageQueue {
             int offset = messageQueue.subscriptions.get(consumerId).getOffset();
             int nextOffset = 0;
             if (offset > -1) {
+                System.out.println(" ===>> receive: start = " + topic + "/" + consumerId + "/" + offset);
                 Indexer.Entry entry = Indexer.getEntry(topic, offset);
                 if (entry == null) return null;
                 nextOffset = offset + entry.getLength();

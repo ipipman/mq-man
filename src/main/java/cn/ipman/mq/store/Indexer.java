@@ -47,6 +47,7 @@ public class Indexer {
     }
 
     public static Entry getEntry(String topic, int offset) {
+        System.out.println("get offset entry , key = " + getOffsetKey(topic, offset));
         return mappings.get(getOffsetKey(topic, offset));
     }
 

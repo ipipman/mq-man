@@ -44,6 +44,12 @@ public class Consumer<T> {
         this.id = "CID" + CID.getAndIncrement();
     }
 
+
+    public Consumer(Broker broker, int customCid) {
+        this.broker = broker;
+        this.id = "CID" + customCid;
+    }
+
     /**
      * 订阅指定主题的消息。
      * <p>

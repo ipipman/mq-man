@@ -95,6 +95,14 @@ public class Broker {
         return consumer;
     }
 
+    public Consumer<?> createConsumer(String topic, int customCid) {
+        Consumer<?> consumer = new Consumer<>(this, customCid);
+        consumer.subscribe(topic);
+        return consumer;
+    }
+
+
+
     /**
      * 发送消息到指定主题。
      *

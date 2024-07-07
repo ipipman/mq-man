@@ -26,7 +26,7 @@ import java.util.Scanner;
 public class MessageStore {
 
     String topic;
-    public static final int LEN = 1024 * 10; //10KB
+    public static final int LEN = 1024 * 100; //100KB
 
     public MessageStore(String topic) {
         this.topic = topic;
