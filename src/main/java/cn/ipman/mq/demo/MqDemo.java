@@ -28,12 +28,12 @@ public class MqDemo {
         // 通过broker创建producer和consumer
         Producer producer = broker.createProducer();
 
-//        // consumer-0
-//        Consumer<?> consumer = broker.createConsumer(topic);
-//        // 测试listen监听topic
-//        consumer.listen(topic, message -> {
-//            System.out.println("listener onMessage => " + message);
-//        });
+        // consumer-0
+        Consumer<?> consumer = broker.createConsumer(topic);
+        // 测试listen监听topic
+        consumer.listen(topic, message -> {
+            System.out.println("listener onMessage => " + message);
+        });
 
         // consumer-1
         Consumer<?> consumer1 = broker.createConsumer(topic);
