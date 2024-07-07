@@ -101,4 +101,8 @@ public class MessageStore {
         return message;
     }
 
+    public int total() {
+        return Indexer.getEntries(topic).size();
+    }
+
 }

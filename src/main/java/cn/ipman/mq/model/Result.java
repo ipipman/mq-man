@@ -37,4 +37,8 @@ public class Result<T> {
     public static Result<String> ok(String msg) {
         return new Result<>(1, msg);
     }
+
+    public static Result<Statistical> stat(Statistical statistical) {
+        return new Result<>(1, statistical);
+    }
 }

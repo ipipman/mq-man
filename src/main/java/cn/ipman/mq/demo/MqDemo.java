@@ -4,6 +4,7 @@ import cn.ipman.mq.client.Broker;
 import cn.ipman.mq.client.Consumer;
 import cn.ipman.mq.model.Message;
 import cn.ipman.mq.client.Producer;
+import cn.ipman.mq.model.Statistical;
 import com.alibaba.fastjson.JSON;
 import lombok.SneakyThrows;
 
@@ -27,12 +28,12 @@ public class MqDemo {
         // 通过broker创建producer和consumer
         Producer producer = broker.createProducer();
 
-        // consumer-0
-        Consumer<?> consumer = broker.createConsumer(topic);
-        // 测试listen监听topic
-        consumer.listen(topic, message -> {
-            System.out.println("listener onMessage => " + message);
-        });
+//        // consumer-0
+//        Consumer<?> consumer = broker.createConsumer(topic);
+//        // 测试listen监听topic
+//        consumer.listen(topic, message -> {
+//            System.out.println("listener onMessage => " + message);
+//        });
 
         // consumer-1
         Consumer<?> consumer1 = broker.createConsumer(topic);
@@ -65,6 +66,10 @@ public class MqDemo {
                 if (message == null) continue;
                 System.out.println("poll ok => " + message.getBody());
                 consumer1.ack(topic, message);
+            }
+            if (c == 's') {
+                Statistical stat = consumer1.statistical(topic);
+                System.out.println(stat);
             }
             if (c == 'a') { // 生产10个
                 for (int i = 0; i < 10; i++) {

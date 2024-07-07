@@ -2,6 +2,7 @@ package cn.ipman.mq.server;
 
 import cn.ipman.mq.model.Message;
 import cn.ipman.mq.model.Result;
+import cn.ipman.mq.model.Statistical;
 import cn.ipman.mq.model.Subscription;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,6 +67,12 @@ public class MQServer {
                                       @RequestParam("cid") String consumerId) {
         MessageQueue.unsub(new Subscription(topic, consumerId, -1));
         return Result.ok();
+    }
+
+    @RequestMapping("/stat")
+    public Result<Statistical> stat(@RequestParam("t") String topic,
+                                    @RequestParam("cid") String consumerId) {
+        return Result.stat(MessageQueue.stat(topic, consumerId));
     }
 
 }

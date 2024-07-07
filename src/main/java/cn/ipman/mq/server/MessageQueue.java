@@ -1,6 +1,7 @@
 package cn.ipman.mq.server;
 
 import cn.ipman.mq.model.Message;
+import cn.ipman.mq.model.Statistical;
 import cn.ipman.mq.model.Subscription;
 import cn.ipman.mq.store.Indexer;
 import cn.ipman.mq.store.MessageStore;
@@ -32,7 +33,7 @@ public class MessageQueue {
 
     String topic;
 
-    MessageStore store;
+    MessageStore store; // 每个topic都有自己的store, 每个topic都有自己的indexer
 
     public MessageQueue(String topic) {
         this.topic = topic;
@@ -71,6 +72,12 @@ public class MessageQueue {
             return result;
         }
         throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
+    }
+
+    public static Statistical stat(String topic, String consumerId) {
+        MessageQueue queue = queues.get(topic);
+        Subscription subscription = queue.subscriptions.get(consumerId);
+        return new Statistical(subscription, queue.store.total(), queue.store.pos());
     }
 
     public int send(Message<String> message) {

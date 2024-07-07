@@ -1,6 +1,7 @@
 package cn.ipman.mq.client;
 
 import cn.ipman.mq.model.Message;
+import cn.ipman.mq.model.Statistical;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -77,6 +78,10 @@ public class Consumer<T> {
     public void listen(String topic, Listener<?> listener) {
         this.listener = listener;
         broker.addConsumer(topic, this);
+    }
+
+    public Statistical statistical(String topic) {
+        return broker.statistical(topic, this.id);
     }
 
 }

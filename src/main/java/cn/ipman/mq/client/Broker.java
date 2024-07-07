@@ -2,6 +2,7 @@ package cn.ipman.mq.client;
 
 import cn.ipman.mq.model.Message;
 import cn.ipman.mq.model.Result;
+import cn.ipman.mq.model.Statistical;
 import cn.ipman.mq.utils.HttpUtils;
 import cn.ipman.mq.utils.ThreadUtils;
 import com.alibaba.fastjson.JSON;
@@ -127,5 +128,13 @@ public class Broker {
         consumers.add(topic, consumer);
     }
 
-
+    public Statistical statistical(String topic, String consumerId) {
+        System.out.println(" ==>> statistical topic/cid: " + topic + "/" + consumerId);
+        Result<Statistical> result = HttpUtils.httpGet(
+                brokerUrl + "/stat?t=" + topic + "&cid=" + consumerId,
+                new TypeReference<Result<Statistical>>() {
+                });
+        System.out.println(" ==>> statistical result: " + result);
+        return result.getData();
+    }
 }
