@@ -1,4 +1,4 @@
-package cn.ipman.mq.client;
+package cn.ipman.mq.broker;
 
 import cn.ipman.mq.model.Message;
 import cn.ipman.mq.model.Statistical;
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Author IpMan
  * @Date 2024/6/29 19:55
  */
-public class Consumer<T> {
+public class MQConsumer<T> {
 
     /**
      * 使用AtomicInteger来全局唯一标识消费者
@@ -30,7 +30,7 @@ public class Consumer<T> {
     /**
      * 与之交互的Broker实例
      */
-    Broker broker;
+    MQBroker broker;
 
     /**
      * Consumer构造函数。
@@ -39,13 +39,13 @@ public class Consumer<T> {
      *
      * @param broker 与消费者交互的Broker实例。
      */
-    public Consumer(Broker broker) {
+    public MQConsumer(MQBroker broker) {
         this.broker = broker;
         this.id = "CID" + CID.getAndIncrement();
     }
 
 
-    public Consumer(Broker broker, int customCid) {
+    public MQConsumer(MQBroker broker, int customCid) {
         this.broker = broker;
         this.id = "CID" + customCid;
     }
@@ -119,7 +119,7 @@ public class Consumer<T> {
     /**
      * 消息监听器，用于异步处理接收到的消息
      */
-    public Listener<?> listener;
+    public MQListener<?> listener;
 
     /**
      * 注册消息监听器。
@@ -129,7 +129,7 @@ public class Consumer<T> {
      * @param topic     监听的消息主题。
      * @param listener 用于处理消息的监听器实例。
      */
-    public void listen(String topic, Listener<?> listener) {
+    public void addListen(String topic, MQListener<?> listener) {
         this.listener = listener;
         broker.addConsumer(topic, this);
     }

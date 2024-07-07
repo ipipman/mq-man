@@ -1,10 +1,17 @@
-package cn.ipman.mq.client;
+package cn.ipman.mq.broker;
 
 
 import cn.ipman.mq.model.Message;
 
+
+/**
+ * Description for this class
+ *
+ * @Author IpMan
+ * @Date 2024/6/29 20:07
+ */
 @FunctionalInterface
-public interface Listener<T> {
+public interface MQListener<T> {
 
     /**
      * 当收到消息时调用此方法。

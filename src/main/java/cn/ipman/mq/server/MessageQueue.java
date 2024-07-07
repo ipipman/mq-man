@@ -49,49 +49,49 @@ public class MessageQueue {
     /**
      * 批量接收消息。
      *
-     * @param topic    消息的主题。
+     * @param topic      消息的主题。
      * @param consumerId 消费者的ID。
-     * @param size     批量接收的消息数量。
+     * @param size       批量接收的消息数量。
      * @return 消息列表。
      */
     public static List<Message<?>> batchReceive(String topic, String consumerId, int size) {
         MessageQueue messageQueue = queues.get(topic);
-        if (messageQueue == null) throw new RuntimeException("topic not found");
-        if (messageQueue.subscriptions.containsKey(consumerId)) {
-
-            int offset = messageQueue.subscriptions.get(consumerId).getOffset();
-            int nextOffset = 0;
-            if (offset > -1) {
-                Indexer.Entry entry = Indexer.getEntry(topic, offset);
-                if (entry == null) return null;
-                nextOffset = offset + entry.getLength();
-            }
-
-            List<Message<?>> result = new ArrayList<>();
-            Message<?> receive = messageQueue.receive(nextOffset);
-            // 如果能拿到数据, 并且不超过batch size的限制时
-            while (receive != null) {
-                result.add(receive);
-                if (result.size() >= size) break;
-
-                offset = Integer.parseInt(receive.getHeaders().get("X-offset"));
-                Indexer.Entry entry = Indexer.getEntry(topic, offset);
-                if (entry == null) break;
-                nextOffset = offset + entry.getLength();
-                receive = messageQueue.receive(nextOffset);
-            }
-            System.out.println(" ===>> batch: topic/cid/size = " + topic + "/" + consumerId + "/" + offset + "/" + result.size());
-            System.out.println(" ===>> batch: last message = " + receive);
-            return result;
+        if (messageQueue == null) {
+            throw new RuntimeException("Topic not found: " + topic);
         }
-        throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
+        if (!messageQueue.subscriptions.containsKey(consumerId)) {
+            throw new RuntimeException("Subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
+        }
+        // 寻找consumerId的消费位置
+        int offset = messageQueue.subscriptions.get(consumerId).getOffset();
+        int nextOffset = 0;
+        if (offset > -1) {
+            Indexer.Entry entry = Indexer.getEntry(topic, offset);
+            if (entry == null) return null;
+            nextOffset = messageQueue.store.nextOffset(offset, entry) + entry.getLength();
+        }
+        // 批量获取数据
+        List<Message<?>> result = new ArrayList<>();
+        Message<?> receive = messageQueue.receive(nextOffset);
+        while (receive != null && result.size() < size) {
+            result.add(receive);
+            offset = Integer.parseInt(receive.getHeaders().get("X-offset"));
+            Indexer.Entry entry = Indexer.getEntry(topic, offset);
+            if (entry == null) {
+                break;
+            }
+            // 获取下一条消息
+            nextOffset = messageQueue.store.nextOffset(offset, entry) + entry.getLength();
+            receive = messageQueue.receive(nextOffset);
+        }
+        return result;
     }
 
 
     /**
      * 统计消息队列的状态。
      *
-     * @param topic    消息的主题。
+     * @param topic      消息的主题。
      * @param consumerId 消费者的ID。
      * @return 消息队列的统计信息。
      */
@@ -175,8 +175,8 @@ public class MessageQueue {
     /**
      * 发送消息的公共接口。
      *
-     * @param topic    消息的主题。
-     * @param message  要发送的消息。
+     * @param topic   消息的主题。
+     * @param message 要发送的消息。
      * @return 消息的偏移量。
      */
     public static int send(String topic, Message<String> message) {
@@ -189,9 +189,9 @@ public class MessageQueue {
     /**
      * 根据偏移量接收消息的公共接口。
      *
-     * @param topic    消息的主题。
+     * @param topic      消息的主题。
      * @param consumerId 消费者的ID。
-     * @param offset   消息的偏移量。
+     * @param offset     消息的偏移量。
      * @return 消息对象。
      */
     public static Message<?> receive(String topic, String consumerId, int offset) {
@@ -206,7 +206,7 @@ public class MessageQueue {
     /**
      * 接收消息，不传入偏移量。
      *
-     * @param topic    消息的主题。
+     * @param topic      消息的主题。
      * @param consumerId 消费者的ID。
      * @return 消息对象。
      */
@@ -219,10 +219,24 @@ public class MessageQueue {
             int offset = messageQueue.subscriptions.get(consumerId).getOffset();
             int nextOffset = 0;
             if (offset > -1) {
+                //offset = messageQueue.store.nextOffset(offset);
+
                 System.out.println(" ===>> receive: start = " + topic + "/" + consumerId + "/" + offset);
                 Indexer.Entry entry = Indexer.getEntry(topic, offset);
                 if (entry == null) return null;
-                nextOffset = offset + entry.getLength();
+                nextOffset = messageQueue.store.nextOffset(offset, entry) + entry.getLength() ;
+
+                // 拿到偏移量,再获取数据
+                Message<?> receive = messageQueue.receive(nextOffset);
+                if (receive == null) {
+                    System.out.println("$$$$$$" + Indexer.getMappings());
+                    System.out.println("$$$$$$" + entry);
+                    System.out.println("$$$$$$" + offset);
+                    System.out.println("$$$$$$" + nextOffset);
+                }
+                System.out.println(" ===>> receive: topic/cid/idx = " + topic + "/" + consumerId + "/" + offset);
+                System.out.println(" ===>> receive: message = " + receive);
+                return receive;
             }
 
             // 拿到偏移量,再获取数据
@@ -230,6 +244,7 @@ public class MessageQueue {
             System.out.println(" ===>> receive: topic/cid/idx = " + topic + "/" + consumerId + "/" + offset);
             System.out.println(" ===>> receive: message = " + receive);
             return receive;
+
         }
         throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
     }
@@ -238,9 +253,9 @@ public class MessageQueue {
     /**
      * 确认消息消费并更新消费者偏移量。
      *
-     * @param topic    消息的主题。
+     * @param topic      消息的主题。
      * @param consumerId 消费者的ID。
-     * @param offset   消息的偏移量。
+     * @param offset     消息的偏移量。
      * @return 更新后的偏移量。
      */
     public static int ack(String topic, String consumerId, int offset) {

@@ -1,4 +1,4 @@
-package cn.ipman.mq.client;
+package cn.ipman.mq.broker;
 
 import cn.ipman.mq.model.Message;
 
@@ -10,20 +10,20 @@ import cn.ipman.mq.model.Message;
  * @Author IpMan
  * @Date 2024/6/29 19:41
  */
-public class Producer {
+public class MQProducer {
 
     /**
      * 消息代理实例。
      * 用于发送消息到指定的主题。
      */
-    Broker broker;
+    MQBroker broker;
 
     /**
      * 构造方法，初始化消息队列生产者。
      *
      * @param broker 消息代理实例，用于实际发送消息。
      */
-    public Producer(Broker broker) {
+    public MQProducer(MQBroker broker) {
         this.broker = broker;
     }
 

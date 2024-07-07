@@ -1,8 +1,8 @@
 package cn.ipman.mq.demo;
 
-import cn.ipman.mq.client.Broker;
-import cn.ipman.mq.client.Consumer;
-import cn.ipman.mq.client.Producer;
+import cn.ipman.mq.broker.MQBroker;
+import cn.ipman.mq.broker.MQConsumer;
+import cn.ipman.mq.broker.MQProducer;
 import cn.ipman.mq.model.Message;
 import cn.ipman.mq.model.Statistical;
 import com.alibaba.fastjson.JSON;
@@ -22,14 +22,14 @@ public class ConsumerDemo3 {
         int ids = 0;
 
         // 创建broker, 绑定topic
-        String topic = "cn.ipman.test";
-        Broker broker = Broker.getDefault();
+        String topic = "im.order";
+        MQBroker broker = MQBroker.getDefault();
 
         // 通过broker创建producer和consumer
-        Producer producer = broker.createProducer();
+        MQProducer producer = broker.createProducer();
 
         // consumer-1
-        Consumer<?> consumer1 = broker.createConsumer(topic, 3);
+        MQConsumer<?> consumer1 = broker.createConsumer(topic, 3);
         // ------------ 生产、消费 ------------------
         for (int i = 0; i < 10; i++) {
             Order order = new Order(ids, "item" + ids, 100 * ids);

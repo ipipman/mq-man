@@ -49,7 +49,7 @@ public class StoreDemo {
                 @SuppressWarnings("unchecked")
                 Message<String> message = (Message<String>) Message.createMessage(content, null);
                 String msg = JSON.toJSONString(message);
-                Indexer.addEntry("im.order", mappedByteBuffer.position(), msg.getBytes(StandardCharsets.UTF_8).length);
+                Indexer.addEntry("im.order", mappedByteBuffer.position(), msg.getBytes(StandardCharsets.UTF_8).length, 0);
                 mappedByteBuffer.put(StandardCharsets.UTF_8.encode(msg));
             }
 

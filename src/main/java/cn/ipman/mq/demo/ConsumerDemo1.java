@@ -1,9 +1,9 @@
 package cn.ipman.mq.demo;
 
-import cn.ipman.mq.client.Broker;
-import cn.ipman.mq.client.Consumer;
+import cn.ipman.mq.broker.MQBroker;
+import cn.ipman.mq.broker.MQConsumer;
 import cn.ipman.mq.model.Message;
-import cn.ipman.mq.client.Producer;
+import cn.ipman.mq.broker.MQProducer;
 import cn.ipman.mq.model.Statistical;
 import com.alibaba.fastjson.JSON;
 import lombok.SneakyThrows;
@@ -23,15 +23,15 @@ public class ConsumerDemo1 {
 
         // 创建broker, 绑定topic
         String topic = "im.order";
-        Broker broker = Broker.getDefault();
+        MQBroker broker = MQBroker.getDefault();
 
         // 通过broker创建producer和consumer
-        Producer producer = broker.createProducer();
+        MQProducer producer = broker.createProducer();
 
         // consumer-1
-        Consumer<?> consumer1 = broker.createConsumer(topic, 1);
+        MQConsumer<?> consumer1 = broker.createConsumer(topic, 1);
         // ------------ 生产、消费 ------------------
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             Order order = new Order(ids, "item" + ids, 100 * ids);
             producer.send(topic, new Message<>(ids++, JSON.toJSONString(order), null));
             System.out.println("send ok => " + order);
@@ -42,12 +42,13 @@ public class ConsumerDemo1 {
             System.out.println("poll ok => " + message); // 做业务处理...
             consumer1.ack(topic, message);
         }
+        System.out.println("===>>===>>===>>===>>===>> " );
 
         while (true) {
             char c = (char) System.in.read();
             if (c == 'q' || c == 'e') { // 退出
                 consumer1.unSubscribe(topic);
-                break;
+                System.exit(0);
             }
             if (c == 'p') { // 生产
                 Order order = new Order(ids, "item" + ids, 100 * ids);
@@ -72,6 +73,5 @@ public class ConsumerDemo1 {
                 System.out.println("send 10 orders... ");
             }
         }
-
     }
 }

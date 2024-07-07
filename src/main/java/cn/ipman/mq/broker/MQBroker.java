@@ -1,12 +1,10 @@
-package cn.ipman.mq.client;
+package cn.ipman.mq.broker;
 
+import cn.ipman.mq.client.ClientService;
+import cn.ipman.mq.client.netty.NettyClientImpl;
 import cn.ipman.mq.model.Message;
-import cn.ipman.mq.model.Result;
 import cn.ipman.mq.model.Statistical;
-import cn.ipman.mq.utils.HttpUtils;
 import cn.ipman.mq.utils.ThreadUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import lombok.Getter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -18,13 +16,18 @@ import org.springframework.util.MultiValueMap;
  * @Author IpMan
  * @Date 2024/6/29 19:44
  */
-public class Broker {
+public class MQBroker {
 
     /**
      * 默认的消息代理实例。
      */
     @Getter
-    public static Broker Default = new Broker();
+    public static MQBroker Default = new MQBroker();
+
+    /**
+     * 网络请求客户端
+     */
+    public ClientService clientService = new NettyClientImpl("127.0.0.1", 6666);
 
     /**
      * 消息代理服务的URL。
@@ -34,7 +37,7 @@ public class Broker {
     /**
      * 所有消费者的集合。
      */
-    final MultiValueMap<String, Consumer<?>> consumers = new LinkedMultiValueMap<>();
+    final MultiValueMap<String, MQConsumer<?>> consumers = new LinkedMultiValueMap<>();
 
     /**
      * 添加消费者到指定主题。
@@ -42,7 +45,7 @@ public class Broker {
      * @param topic     主题。
      * @param consumer  消费者。
      */
-    public void addConsumer(String topic, Consumer<?> consumer) {
+    public void addConsumer(String topic, MQConsumer<?> consumer) {
         consumers.add(topic, consumer);
     }
 
@@ -57,9 +60,10 @@ public class Broker {
         // 定时轮询消息队列，并调用监听器处理消息
         ThreadUtils.getDefault().init(1);
         ThreadUtils.getDefault().schedule(() -> {
-            MultiValueMap<String, Consumer<?>> consumers = getDefault().consumers;
+            MultiValueMap<String, MQConsumer<?>> consumers = getDefault().consumers;
             // 遍历所有topic下的消费者, 分别取server端获取数据, 并调用监听器处理消息
             consumers.forEach((topic, c) -> c.forEach(consumer -> {
+                // 消费数据
                 Message<?> receive = consumer.receive(topic);
                 if (receive == null) return;
                 try {
@@ -67,7 +71,7 @@ public class Broker {
                     consumer.listener.onMessage(receive);
                     consumer.ack(topic, receive);
                 } catch (Exception e) {
-                    //todo
+                    //todo retry
                 }
             }));
         }, 100, 100);
@@ -79,8 +83,8 @@ public class Broker {
      *
      * @return 生产者实例。
      */
-    public Producer createProducer() {
-        return new Producer(this);
+    public MQProducer createProducer() {
+        return new MQProducer(this);
     }
 
     /**
@@ -90,18 +94,17 @@ public class Broker {
      * @return 消费者实例。
      */
     @SuppressWarnings("unused")
-    public Consumer<?> createConsumer(String topic) {
-        Consumer<?> consumer = new Consumer<>(this);
+    public MQConsumer<?> createConsumer(String topic) {
+        MQConsumer<?> consumer = new MQConsumer<>(this);
         consumer.subscribe(topic);
         return consumer;
     }
 
-    public Consumer<?> createConsumer(String topic, int customCid) {
-        Consumer<?> consumer = new Consumer<>(this, customCid);
+    public MQConsumer<?> createConsumer(String topic, int customCid) {
+        MQConsumer<?> consumer = new MQConsumer<>(this, customCid);
         consumer.subscribe(topic);
         return consumer;
     }
-
 
 
     /**
@@ -112,13 +115,7 @@ public class Broker {
      * @return 发送是否成功。
      */
     public boolean send(String topic, Message<?> message) {
-        System.out.println(" ==>> send topic/message: " + topic + "/" + message);
-        System.out.println(JSON.toJSONString(message));
-        Result<String> result = HttpUtils.httpPost(JSON.toJSONString(message),
-                brokerUrl + "/send?t=" + topic, new TypeReference<Result<String>>() {
-                });
-        System.out.println(" ==>> send result: " + result);
-        return result.getCode() == 1;
+        return clientService.send(topic, message);
     }
 
     /**
@@ -128,11 +125,7 @@ public class Broker {
      * @param consumerId 消费者ID。
      */
     public void subscribe(String topic, String consumerId) {
-        System.out.println(" ==>> subscribe topic/consumerID: " + topic + "/" + consumerId);
-        Result<String> result = HttpUtils.httpGet(brokerUrl + "/sub?t=" + topic + "&cid=" + consumerId,
-                new TypeReference<Result<String>>() {
-                });
-        System.out.println(" ==>> subscribe result: " + result);
+        clientService.subscribe(topic, consumerId);
     }
 
     /**
@@ -144,12 +137,7 @@ public class Broker {
      */
     @SuppressWarnings("unchecked")
     public <T> Message<T> receive(String topic, String consumerId) {
-        System.out.println(" ==>> receive topic/cid: " + topic + "/" + consumerId);
-        Result<Message<String>> result = HttpUtils.httpGet(brokerUrl + "/receive?t=" + topic + "&cid=" + consumerId,
-                new TypeReference<Result<Message<String>>>() {
-                });
-        System.out.println(" ==>> receive result: " + result);
-        return (Message<T>) result.getData();
+        return clientService.receive(topic, consumerId);
     }
 
     /**
@@ -159,11 +147,7 @@ public class Broker {
      * @param consumerId 消费者ID。
      */
     public void unSubscribe(String topic, String consumerId) {
-        System.out.println(" ==>> unSubscribe topic/cid: " + topic + "/" + consumerId);
-        Result<String> result = HttpUtils.httpGet(brokerUrl + "/unsub?t=" + topic + "&cid=" + consumerId,
-                new TypeReference<Result<String>>() {
-                });
-        System.out.println(" ==>> unSubscribe result: " + result);
+        clientService.unSubscribe(topic, consumerId);
     }
 
     /**
@@ -175,13 +159,7 @@ public class Broker {
      * @return 确认是否成功。
      */
     public boolean ack(String topic, String consumerId, int offset) {
-        System.out.println(" ==>> ack topic/cid/offset: " + topic + "/" + consumerId + "/" + offset);
-        Result<String> result = HttpUtils.httpGet(
-                brokerUrl + "/ack?t=" + topic + "&cid=" + consumerId + "&offset=" + offset,
-                new TypeReference<Result<String>>() {
-                });
-        System.out.println(" ==>> ack result: " + result);
-        return result.getCode() == 1;
+        return clientService.ack(topic, consumerId, offset);
     }
 
 
@@ -193,12 +171,6 @@ public class Broker {
      * @return 统计信息对象。
      */
     public Statistical statistical(String topic, String consumerId) {
-        System.out.println(" ==>> statistical topic/cid: " + topic + "/" + consumerId);
-        Result<Statistical> result = HttpUtils.httpGet(
-                brokerUrl + "/stat?t=" + topic + "&cid=" + consumerId,
-                new TypeReference<Result<Statistical>>() {
-                });
-        System.out.println(" ==>> statistical result: " + result);
-        return result.getData();
+        return clientService.statistical(topic, consumerId);
     }
 }
