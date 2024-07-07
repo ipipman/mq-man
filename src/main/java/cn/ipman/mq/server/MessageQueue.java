@@ -1,6 +1,7 @@
 package cn.ipman.mq.server;
 
 import cn.ipman.mq.model.Message;
+import cn.ipman.mq.model.Subscription;
 import cn.ipman.mq.store.Indexer;
 import cn.ipman.mq.store.MessageStore;
 
@@ -27,7 +28,7 @@ public class MessageQueue {
     }
 
     // 记录客户端订阅关系, 记录consumerID的消费关系,如消费哪些topic, 以及在topic的消费位置offset
-    Map<String, MessageSubscription> subscriptions = new HashMap<>();
+    Map<String, Subscription> subscriptions = new HashMap<>();
 
     String topic;
 
@@ -83,25 +84,25 @@ public class MessageQueue {
         return store.read(offset);
     }
 
-    public void subscribe(MessageSubscription subscription) {
+    public void subscribe(Subscription subscription) {
         // 添加订阅关系
         String consumerId = subscription.getConsumerId();
         subscriptions.putIfAbsent(consumerId, subscription);
     }
 
-    private void unsubscribe(MessageSubscription subscription) {
+    private void unsubscribe(Subscription subscription) {
         String consumerId = subscription.getConsumerId();
         subscriptions.remove(consumerId);
     }
 
-    public static void sub(MessageSubscription subscription) {
+    public static void sub(Subscription subscription) {
         MessageQueue messageQueue = queues.get(subscription.getTopic());
         System.out.println(" ===>> sub: subscription = " + subscription);
         if (messageQueue == null) throw new RuntimeException("topic not found");
         messageQueue.subscribe(subscription);
     }
 
-    public static void unsub(MessageSubscription subscription) {
+    public static void unsub(Subscription subscription) {
         MessageQueue messageQueue = queues.get(subscription.getTopic());
         System.out.println(" ===>> unsub: subscription = " + subscription);
         if (messageQueue == null) return;
@@ -155,7 +156,7 @@ public class MessageQueue {
         if (messageQueue == null) throw new RuntimeException("topic not found");
 
         if (messageQueue.subscriptions.containsKey(consumerId)) {
-            MessageSubscription subscription = messageQueue.subscriptions.get(consumerId);
+            Subscription subscription = messageQueue.subscriptions.get(consumerId);
 
             if (offset > subscription.getOffset() && offset < MessageStore.LEN) {
                 System.out.println(" ===>> ack: topic/cid/offset = " + topic + "/" + consumerId + "/" + offset);
