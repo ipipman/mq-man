@@ -31,7 +31,7 @@ public class ConsumerDemo1 {
         // consumer-1
         MQConsumer<?> consumer1 = broker.createConsumer(topic, 1);
         // ------------ 生产、消费 ------------------
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 200; i++) {
             Order order = new Order(ids, "item" + ids, 100 * ids);
             producer.send(topic, new Message<>(ids++, JSON.toJSONString(order), null));
             System.out.println("send ok => " + order);

@@ -3,6 +3,7 @@ package cn.ipman.mq.store;
 import cn.ipman.mq.model.Message;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.io.File;
@@ -16,7 +17,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 消息存储类，用于存储和检索消息。
@@ -28,9 +32,12 @@ public class MessageStore {
     public static final int LEN = 1024 * 10;  // 100KB 每个文件的大小
     MappedByteBuffer mappedByteBuffer = null;
     FileChannel channel = null;
+    @Getter
     int currentFileIndex = 0;
     int currentOffset = 0;
     Map<Integer, MappedByteBuffer> fileBuffers = new HashMap<>();
+    public final static String STORE_DIR = "storage/";
+    public final static String STORE_FILE_FORMAT = ".dat";
 
     public MessageStore(String topic) {
         this.topic = topic;
@@ -38,16 +45,21 @@ public class MessageStore {
 
     @SneakyThrows
     public void init() {
-        File dir = new File(this.topic);
+        File dir = new File(STORE_DIR + this.topic);
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".dat"));
+        File[] files = dir.listFiles((d, name) -> name.endsWith(STORE_FILE_FORMAT));
         if (files != null) {
+            List<Integer> fileIndexer = new LinkedList<>();
             for (File file : files) {
-                int fileIndex = Integer.parseInt(file.getName().replace(".dat", ""));
-                loadFile(fileIndex);
+                int fileIndex = Integer.parseInt(file.getName().replace(STORE_FILE_FORMAT, ""));
+                fileIndexer.add(fileIndex);
             }
+            int lastFileIndex = fileIndexer.stream().max(Integer::compare).orElse(0);
+            fileIndexer.stream().sorted().toList().forEach(fi -> {
+                loadFile(fi, lastFileIndex);
+            });
         }
         if (files == null || files.length == 0) {
             openFile(0);
@@ -59,14 +71,28 @@ public class MessageStore {
     }
 
     public int nextOffset(int offset, Indexer.Entry entry) {
-        int result = offset + entry.getFileIndex() * LEN;
-        System.out.println("************::" + result);
-        return result;
+
+        int fileIndex = entry.getFileIndex();
+        int expected = offset + entry.getLength();
+        Indexer.FileSegment fileSegment = Indexer.getFileSegment(this.topic, fileIndex);
+        if (fileSegment == null) {
+            return expected;
+        }
+
+        if (expected >= fileSegment.getMaxOffset()) {
+            System.out.println("reset offset to next file " + expected);
+            int nextIndex = fileIndex + 1;
+            if (fileBuffers.containsKey(nextIndex)) {
+                return nextIndex * LEN;
+            }
+        }
+        return expected;
     }
 
+
     @SneakyThrows
-    private void loadFile(int fileIndex) {
-        File file = new File(this.topic + File.separator + fileIndex + ".dat");
+    private void loadFile(int fileIndex, int lastFileIndex) {
+        File file = new File(STORE_DIR + this.topic + File.separator + fileIndex + STORE_FILE_FORMAT);
         Path path = Paths.get(file.getAbsolutePath());
         FileChannel channel = (FileChannel) Files.newByteChannel(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
         MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, LEN);
@@ -85,12 +111,21 @@ public class MessageStore {
             if (readOnlyBuffer.remaining() < 10) break;
             readOnlyBuffer.get(header);
         }
+
+        // 初始化topic下多个文件时, 计算每个文件最大offset, 用于消费时按offset切换文件
+        if (fileIndex != lastFileIndex){
+            int maxOffset = (readOnlyBuffer.position() - 10) + fileIndex * LEN;
+            Indexer.addFileSegments(this.topic, fileIndex, maxOffset);
+            System.out.println("init load file topic/index/maxOffset => " + this.topic
+                    + fileIndex + "/" + maxOffset);
+        }
         readOnlyBuffer.clear();
     }
 
     @SneakyThrows
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void openFile(int fileIndex) {
-        File file = new File(this.topic + File.separator + fileIndex + ".dat");
+        File file = new File(STORE_DIR + this.topic + File.separator + fileIndex + STORE_FILE_FORMAT);
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -102,28 +137,38 @@ public class MessageStore {
         currentOffset = 0;
     }
 
-    public int write(Message<String> message) {
+    public synchronized int write(Message<String> message) {
         String json = JSON.toJSONString(message);
         int len = json.getBytes(StandardCharsets.UTF_8).length;
-        String format = String.format("%010d", len);
-        String msg = format + json;
         len = len + 10;
 
         if (mappedByteBuffer.remaining() < len) {
-            System.out.println("写满了......");
+            int maxOffset = mappedByteBuffer.position() + currentFileIndex * LEN;
+            Indexer.addFileSegments(this.topic, currentFileIndex, maxOffset);
             try {
                 channel.close();
-            } catch (IOException e) {
+            } catch (NullPointerException | IOException e) {
                 e.printStackTrace();
             }
             openFile(++currentFileIndex);
         }
 
+        // 如果文件被写满, 需要重新计算position, 从而得出最终的offset
         int position = mappedByteBuffer.position();
-        Indexer.addEntry(this.topic, position + currentFileIndex * LEN, len, currentFileIndex);
+        int offset = position + currentFileIndex * LEN;
+
+        // 重新计算更新offset后的message长度
+        message.getHeaders().put("X-offset", String.valueOf(offset));
+        json = JSON.toJSONString(message);
+        len = json.getBytes(StandardCharsets.UTF_8).length;
+        String format = String.format("%010d", len);
+        String msg = format + json;
+        len = len + 10;
+
+        Indexer.addEntry(this.topic, offset, len, currentFileIndex);
         mappedByteBuffer.put(StandardCharsets.UTF_8.encode(msg));
         currentOffset = mappedByteBuffer.position();
-        return position + currentFileIndex * LEN;
+        return offset;
     }
 
     public int pos() {
@@ -151,6 +196,7 @@ public class MessageStore {
 
         Message<String> message = JSON.parseObject(json, new TypeReference<Message<String>>() {
         });
+
         readOnlyBuffer.clear();
         return message;
     }

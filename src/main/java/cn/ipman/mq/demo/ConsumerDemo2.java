@@ -40,12 +40,5 @@ public class ConsumerDemo2 {
         });
 
 
-
-//        // ------------ 生产、消费 ------------------
-//        for (int i = 0; i < 10; i++) {
-//            Order order = new Order(ids, "item" + ids, 100 * ids);
-//            producer.send(topic, new Message<>(ids++, JSON.toJSONString(order), null));
-//            System.out.println("send ok => " + order);
-//        }
     }
 }

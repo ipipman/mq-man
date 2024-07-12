@@ -68,7 +68,7 @@ public class MessageQueue {
         if (offset > -1) {
             Indexer.Entry entry = Indexer.getEntry(topic, offset);
             if (entry == null) return null;
-            nextOffset = messageQueue.store.nextOffset(offset, entry) + entry.getLength();
+            nextOffset = messageQueue.store.nextOffset(offset, entry);
         }
         // 批量获取数据
         List<Message<?>> result = new ArrayList<>();
@@ -81,7 +81,7 @@ public class MessageQueue {
                 break;
             }
             // 获取下一条消息
-            nextOffset = messageQueue.store.nextOffset(offset, entry) + entry.getLength();
+            nextOffset = messageQueue.store.nextOffset(offset, entry);
             receive = messageQueue.receive(nextOffset);
         }
         return result;
@@ -113,7 +113,7 @@ public class MessageQueue {
         // 将偏移量记录在消息头中
         message.getHeaders().put("X-offset", String.valueOf(offset));
         // 写入消息到存储
-        store.write(message);
+        offset = store.write(message);
         return offset;
     }
 
@@ -219,24 +219,10 @@ public class MessageQueue {
             int offset = messageQueue.subscriptions.get(consumerId).getOffset();
             int nextOffset = 0;
             if (offset > -1) {
-                //offset = messageQueue.store.nextOffset(offset);
-
                 System.out.println(" ===>> receive: start = " + topic + "/" + consumerId + "/" + offset);
                 Indexer.Entry entry = Indexer.getEntry(topic, offset);
                 if (entry == null) return null;
-                nextOffset = messageQueue.store.nextOffset(offset, entry) + entry.getLength() ;
-
-                // 拿到偏移量,再获取数据
-                Message<?> receive = messageQueue.receive(nextOffset);
-                if (receive == null) {
-                    System.out.println("$$$$$$" + Indexer.getMappings());
-                    System.out.println("$$$$$$" + entry);
-                    System.out.println("$$$$$$" + offset);
-                    System.out.println("$$$$$$" + nextOffset);
-                }
-                System.out.println(" ===>> receive: topic/cid/idx = " + topic + "/" + consumerId + "/" + offset);
-                System.out.println(" ===>> receive: message = " + receive);
-                return receive;
+                nextOffset = messageQueue.store.nextOffset(offset, entry) ;
             }
 
             // 拿到偏移量,再获取数据
@@ -266,7 +252,8 @@ public class MessageQueue {
             Subscription subscription = messageQueue.subscriptions.get(consumerId);
 
             // 检查偏移量是否有效并更新订阅的偏移量
-            if (offset > subscription.getOffset() && offset < MessageStore.LEN) {
+            int maxOffset = (messageQueue.store.getCurrentFileIndex() + 1) * MessageStore.LEN;
+            if (offset > subscription.getOffset() && offset < maxOffset) {
                 System.out.println(" ===>> ack: topic/cid/offset = " + topic + "/" + consumerId + "/" + offset);
                 subscription.setOffset(offset);
                 return offset;
@@ -275,6 +262,5 @@ public class MessageQueue {
         }
         throw new RuntimeException("subscriptions not found for topic/consumerId = " + topic + "/" + consumerId);
     }
-
 
 }
