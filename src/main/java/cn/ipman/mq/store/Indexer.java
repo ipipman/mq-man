@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static cn.ipman.mq.store.MessageStore.LEN;
-
 /**
  * 索引器类，用于存储和检索消息的偏移量和长度信息。
  * 提供了根据主题和偏移量添加入口、根据主题获取所有入口、根据主题和偏移量获取特定入口的方法。

@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 消息存储类，用于存储和检索消息。
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 public class MessageStore {
 
     String topic;
-    public static final int LEN = 1024 * 10;  // 100KB 每个文件的大小
+    public static final int LEN = 1024 * 10;  // 10KB 每个文件的大小
     MappedByteBuffer mappedByteBuffer = null;
     FileChannel channel = null;
     @Getter

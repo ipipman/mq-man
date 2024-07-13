@@ -3,8 +3,6 @@ package cn.ipman.mq.demo;
 import cn.ipman.mq.broker.MQBroker;
 import cn.ipman.mq.broker.MQConsumer;
 import cn.ipman.mq.broker.MQProducer;
-import cn.ipman.mq.model.Message;
-import com.alibaba.fastjson.JSON;
 import lombok.SneakyThrows;
 
 /**
