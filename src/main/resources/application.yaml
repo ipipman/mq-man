@@ -1,6 +1,0 @@
-spring:
-  application:
-    name: mq-man
-
-server:
-  port: 8765

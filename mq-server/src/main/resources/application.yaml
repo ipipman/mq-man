@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: mq-server
+
+server:
+  port: 8765
