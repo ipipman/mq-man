@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.ipipman</groupId>
   <artifactId>mq-client-spring-demo</artifactId>
-  <version>0.0.1-RELEASE</version>
+  <version>0.0.2-RELEASE</version>
   <name>mq-client-spring-demo</name>
   <description>mq-client-spring-demo</description>
   <url>https://github.com/ipipman/mq-man/mq-client-spring-demo</url>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>io.github.ipipman</groupId>
       <artifactId>mq-client</artifactId>
-      <version>0.0.1-RELEASE</version>
+      <version>0.0.2-RELEASE</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

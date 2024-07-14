@@ -20,7 +20,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <mq-man.version>0.0.1-RELEASE</mq-man.version>
+        <mq-man.version>0.0.2-RELEASE</mq-man.version>
     </properties>
 
     <modules>
