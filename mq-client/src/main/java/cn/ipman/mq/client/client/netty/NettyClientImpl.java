@@ -13,24 +13,50 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
- * Description for this class
+ * Netty客户端实现类，作为MQ客户端的具体实现，负责与Netty服务端进行通信。
  *
  * @Author IpMan
  * @Date 2024/6/29 20:07
  */
 public class NettyClientImpl implements ClientService {
 
+    /**
+     * 服务端主机地址。
+     */
     String host;
+
+    /**
+     * 服务端端口号。
+     */
     int port;
+
+    /**
+     * 客户端连接池，管理NettyMQClient的连接。
+     */
     NettyMQClientPool clientPool;
 
-
+    /**
+     * 构造函数，初始化Netty客户端实例。
+     *
+     * @param host     服务端主机地址。
+     * @param port     服务端端口号。
+     * @param maxTotal 连接池最大总数。
+     * @param maxIdle  连接池最大空闲数。
+     * @param minIdle  连接池最小空闲数。
+     */
     public NettyClientImpl(String host, int port, int maxTotal, int maxIdle, int minIdle) {
         this.host = host;
         this.port = port;
         this.clientPool = new NettyMQClientPool(host, port, maxTotal, maxIdle, minIdle);
     }
 
+    /**
+     * 使用客户端连接池中的客户端执行给定的操作。
+     *
+     * @param function 定义如何使用客户端执行特定操作的函数式接口。
+     * @param <T>      操作的返回类型。
+     * @return 操作的执行结果。
+     */
     private <T> T executeWithClient(Function<NettyMQClient, T> function) {
         NettyMQClient client = null;
         try {
@@ -46,6 +72,14 @@ public class NettyClientImpl implements ClientService {
         }
     }
 
+
+    /**
+     * 发送消息到指定主题。
+     *
+     * @param topic    消息主题。
+     * @param message  待发送的消息。
+     * @return 发送是否成功的布尔值。
+     */
     @Override
     public Boolean send(String topic, Message<?> message) {
         return executeWithClient(client -> {
@@ -64,6 +98,12 @@ public class NettyClientImpl implements ClientService {
         });
     }
 
+    /**
+     * 订阅指定主题。
+     *
+     * @param topic    消息主题。
+     * @param consumerId 消费者ID。
+     */
     @Override
     public void subscribe(String topic, String consumerId) {
         executeWithClient(client -> {
@@ -81,6 +121,14 @@ public class NettyClientImpl implements ClientService {
         });
     }
 
+    /**
+     * 从指定主题接收消息。
+     *
+     * @param topic    消息主题。
+     * @param consumerId 消费者ID。
+     * @param <T>      消息体的类型。
+     * @return 接收到的消息。
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> Message<T> receive(String topic, String consumerId) {
@@ -100,6 +148,12 @@ public class NettyClientImpl implements ClientService {
         });
     }
 
+    /**
+     * 取消订阅指定主题。
+     *
+     * @param topic    消息主题。
+     * @param consumerId 消费者ID。
+     */
     @Override
     public void unSubscribe(String topic, String consumerId) {
         executeWithClient(client -> {
@@ -117,6 +171,14 @@ public class NettyClientImpl implements ClientService {
         });
     }
 
+    /**
+     * 确认消息消费，更新消费位点。
+     *
+     * @param topic    消息主题。
+     * @param consumerId 消费者ID。
+     * @param offset   消费位点。
+     * @return 确认是否成功的布尔值。
+     */
     @Override
     public Boolean ack(String topic, String consumerId, int offset) {
         return executeWithClient(client -> {
@@ -139,6 +201,13 @@ public class NettyClientImpl implements ClientService {
         });
     }
 
+    /**
+     * 获取指定主题和消费者ID的消费统计信息。
+     *
+     * @param topic    消息主题。
+     * @param consumerId 消费者ID。
+     * @return 消费统计信息。
+     */
     @Override
     public Statistical statistical(String topic, String consumerId) {
         return executeWithClient(client -> {

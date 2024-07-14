@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Description for this class
+ * 客户端配置
  *
  * @Author IpMan
  * @Date 2024/7/14 10:21

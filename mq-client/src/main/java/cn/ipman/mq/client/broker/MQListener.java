@@ -3,8 +3,10 @@ package cn.ipman.mq.client.broker;
 import cn.ipman.mq.metadata.model.Message;
 
 /**
- * Description for this class
+ * 消息队列监听器接口。
+ * 该接口定义了一个函数式接口，用于监听和处理消息队列中的消息。
  *
+ * @param <T> 消息体的类型参数，允许监听器根据消息类型进行特定的处理。
  * @Author IpMan
  * @Date 2024/6/29 20:07
  */

@@ -37,7 +37,6 @@ public interface ClientService {
      * @param consumerId 消费者ID。
      * @return 消息对象。
      */
-    @SuppressWarnings("unchecked")
     <T> Message<T> receive(String topic, String consumerId);
 
     /**

@@ -98,6 +98,14 @@ public class MQBroker {
         return consumer;
     }
 
+
+    /**
+     * 创建一个消息消费者，用于订阅指定的主题。
+     *
+     * @param topic 消息的主题，指定消费者将订阅的消息类型。
+     * @param customCid 客户端自定义的消费者组ID，用于标识一组消费者实例，同组内的消费者将共享消息的消费。
+     * @return 返回创建的消费者实例，该实例已配置好订阅的主题和消费者组ID。
+     */
     public MQConsumer<?> createConsumer(String topic, int customCid) {
         MQConsumer<?> consumer = new MQConsumer<>(this, customCid);
         consumer.subscribe(topic);
@@ -133,7 +141,6 @@ public class MQBroker {
      * @param consumerId 消费者ID。
      * @return 消息对象。
      */
-    @SuppressWarnings("unchecked")
     public <T> Message<T> receive(String topic, String consumerId) {
         return clientService.receive(topic, consumerId);
     }
