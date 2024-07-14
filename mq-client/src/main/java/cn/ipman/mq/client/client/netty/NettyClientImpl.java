@@ -24,11 +24,8 @@ public class NettyClientImpl implements ClientService {
     int port;
     NettyMQClientPool clientPool;
 
-    int maxTotal = 10;
-    int maxIdle = 5;
-    int minIdle = 2;
 
-    public NettyClientImpl(String host, int port) {
+    public NettyClientImpl(String host, int port, int maxTotal, int maxIdle, int minIdle) {
         this.host = host;
         this.port = port;
         this.clientPool = new NettyMQClientPool(host, port, maxTotal, maxIdle, minIdle);

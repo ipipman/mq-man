@@ -1,7 +1,7 @@
 package cn.ipman.mq.client.annotation;
 
 import cn.ipman.mq.client.broker.MQListenerProcessor;
-import cn.ipman.mq.client.config.MQClientConfig;
+import cn.ipman.mq.client.config.MQClientBootstrapConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -16,7 +16,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
-@Import({MQClientConfig.class, MQListenerProcessor.class})
+@Import({MQClientBootstrapConfig.class, MQListenerProcessor.class})
 @SuppressWarnings("unused")
 public @interface EnableMqMan {
 }

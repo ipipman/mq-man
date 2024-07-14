@@ -3,4 +3,12 @@ spring:
     name: mq-server
 
 server:
-  port: 8765
+  port: 9765
+
+mq:
+  server:
+    port: 8765
+    boss:
+      threads: 2
+    worker:
+      threads: 16

@@ -24,15 +24,17 @@ public class MQBroker {
     @Getter
     public static MQBroker Default = new MQBroker();
 
-    /**
-     * 网络请求客户端
-     */
-    public ClientService clientService = new NettyClientImpl("127.0.0.1", 6666);
+    public ClientService clientService;
 
-    /**
-     * 消息代理服务的URL。
-     */
-    public static String brokerUrl = "http://localhost:8765/mq";
+    public MQBroker() {
+        this.clientService = new NettyClientImpl(
+                "127.0.0.1", 8765, 10, 5, 2);
+    }
+
+    public MQBroker(ClientService clientService) {
+        this.clientService = clientService;
+    }
+
 
     /**
      * 所有消费者的集合。
@@ -42,25 +44,21 @@ public class MQBroker {
     /**
      * 添加消费者到指定主题。
      *
-     * @param topic     主题。
-     * @param consumer  消费者。
+     * @param topic    主题。
+     * @param consumer 消费者。
      */
     public void addConsumer(String topic, MQConsumer<?> consumer) {
         consumers.add(topic, consumer);
     }
 
-    static {
-        init();
-    }
 
     /**
      * 初始化消息代理，启动定时任务轮询消费者以处理消息。
      */
-    public static void init() {
+    public void init() {
         // 定时轮询消息队列，并调用监听器处理消息
         ThreadUtils.getDefault().init(1);
         ThreadUtils.getDefault().schedule(() -> {
-            MultiValueMap<String, MQConsumer<?>> consumers = getDefault().consumers;
             // 遍历所有topic下的消费者, 分别取server端获取数据, 并调用监听器处理消息
             consumers.forEach((topic, c) -> c.forEach(consumer -> {
                 // 消费数据
@@ -110,7 +108,7 @@ public class MQBroker {
     /**
      * 发送消息到指定主题。
      *
-     * @param topic  消息主题。
+     * @param topic   消息主题。
      * @param message 消息对象。
      * @return 发送是否成功。
      */
@@ -121,7 +119,7 @@ public class MQBroker {
     /**
      * 订阅指定主题。
      *
-     * @param topic     主题。
+     * @param topic      主题。
      * @param consumerId 消费者ID。
      */
     public void subscribe(String topic, String consumerId) {
@@ -131,7 +129,7 @@ public class MQBroker {
     /**
      * 接收指定主题的消息。
      *
-     * @param topic     主题。
+     * @param topic      主题。
      * @param consumerId 消费者ID。
      * @return 消息对象。
      */
@@ -143,7 +141,7 @@ public class MQBroker {
     /**
      * 取消订阅指定主题。
      *
-     * @param topic     主题。
+     * @param topic      主题。
      * @param consumerId 消费者ID。
      */
     public void unSubscribe(String topic, String consumerId) {
@@ -153,9 +151,9 @@ public class MQBroker {
     /**
      * 确认消息消费。
      *
-     * @param topic     主题。
+     * @param topic      主题。
      * @param consumerId 消费者ID。
-     * @param offset    消息偏移量。
+     * @param offset     消息偏移量。
      * @return 确认是否成功。
      */
     public boolean ack(String topic, String consumerId, int offset) {
@@ -166,7 +164,7 @@ public class MQBroker {
     /**
      * 获取指定主题和消费者ID的统计信息。
      *
-     * @param topic     主题。
+     * @param topic      主题。
      * @param consumerId 消费者ID。
      * @return 统计信息对象。
      */

@@ -27,15 +27,19 @@ import static cn.ipman.mq.metadata.model.Constants.MAX_FRAME_LENGTH;
 public class NettyMQServer {
 
     int port;
+    int bossThreads;
+    int workerThreads;
 
-    public NettyMQServer(int port) {
+    public NettyMQServer(int port, int bossThreads, int workerThreads) {
         this.port = port;
+        this.bossThreads = bossThreads;
+        this.workerThreads  = workerThreads;
     }
 
     public void run() throws Exception {
 
-        EventLoopGroup bossGroup = new NioEventLoopGroup(2);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(16);
+        EventLoopGroup bossGroup = new NioEventLoopGroup(bossThreads);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(workerThreads);
 
         try {
             ServerBootstrap b = new ServerBootstrap();
