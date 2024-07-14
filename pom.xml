@@ -25,6 +25,7 @@
         <module>mq-client</module>
         <module>mq-server</module>
         <module>mq-metadata</module>
+        <module>mq-client-spring-demo</module>
     </modules>
 
     <build>
