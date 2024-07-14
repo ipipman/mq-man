@@ -1,4 +1,4 @@
-package cn.ipman.mq.client.demo;
+package cn.ipman.mq.client.spring.demo.sample;
 
 import cn.ipman.mq.client.broker.MQBroker;
 import cn.ipman.mq.client.broker.MQConsumer;
@@ -15,7 +15,7 @@ import lombok.SneakyThrows;
  * @Author IpMan
  * @Date 2024/6/29 20:06
  */
-public class ConsumerDemo3 {
+public class ConsumerDemo1 {
 
     @SneakyThrows
     @SuppressWarnings("unchecked")
@@ -30,9 +30,9 @@ public class ConsumerDemo3 {
         MQProducer producer = broker.createProducer();
 
         // consumer-1
-        MQConsumer<?> consumer1 = broker.createConsumer(topic, 3);
+        MQConsumer<?> consumer1 = broker.createConsumer(topic, 1);
         // ------------ 生产、消费 ------------------
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 200; i++) {
             Order order = new Order(ids, "item" + ids, 100 * ids);
             producer.send(topic, new Message<>(ids++, JSON.toJSONString(order), null));
             System.out.println("send ok => " + order);
@@ -43,12 +43,13 @@ public class ConsumerDemo3 {
             System.out.println("poll ok => " + message); // 做业务处理...
             consumer1.ack(topic, message);
         }
+        System.out.println("===>>===>>===>>===>>===>> " );
 
         while (true) {
             char c = (char) System.in.read();
             if (c == 'q' || c == 'e') { // 退出
                 consumer1.unSubscribe(topic);
-                break;
+                System.exit(0);
             }
             if (c == 'p') { // 生产
                 Order order = new Order(ids, "item" + ids, 100 * ids);
@@ -73,6 +74,5 @@ public class ConsumerDemo3 {
                 System.out.println("send 10 orders... ");
             }
         }
-
     }
 }

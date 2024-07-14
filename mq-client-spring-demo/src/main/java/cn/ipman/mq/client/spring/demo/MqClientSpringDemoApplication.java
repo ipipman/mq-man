@@ -23,12 +23,10 @@ public class MqClientSpringDemoApplication {
         SpringApplication.run(MqClientSpringDemoApplication.class, args);
     }
 
-
     @Bean
     @SuppressWarnings("unchecked")
     public ApplicationRunner runner(@Autowired ApplicationContext context) {
         return x -> {
-
             int ids = 0;
             String topic = "im.order";
 

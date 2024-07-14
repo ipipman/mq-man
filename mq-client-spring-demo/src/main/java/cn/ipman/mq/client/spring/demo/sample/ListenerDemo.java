@@ -1,4 +1,4 @@
-package cn.ipman.mq.client.spring.demo;
+package cn.ipman.mq.client.spring.demo.sample;
 
 import cn.ipman.mq.client.annotation.MQListener;
 import cn.ipman.mq.metadata.model.Message;

@@ -1,4 +1,4 @@
-package cn.ipman.mq.client.demo;
+package cn.ipman.mq.client.spring.demo.sample;
 
 
 import cn.ipman.mq.client.client.netty.NettyMQClient;
