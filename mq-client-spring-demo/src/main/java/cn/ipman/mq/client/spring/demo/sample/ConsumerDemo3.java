@@ -3,7 +3,7 @@ package cn.ipman.mq.client.spring.demo.sample;
 import cn.ipman.mq.client.broker.MQBroker;
 import cn.ipman.mq.client.broker.MQConsumer;
 import cn.ipman.mq.client.broker.MQProducer;
-import cn.ipman.mq.metadata.demo.Order;
+import cn.ipman.mq.metadata.data.Order;
 import cn.ipman.mq.metadata.model.Message;
 import cn.ipman.mq.metadata.model.Statistical;
 import com.alibaba.fastjson.JSON;

@@ -3,7 +3,7 @@ package cn.ipman.mq.client.spring.demo.sample;
 
 import cn.ipman.mq.client.client.netty.NettyMQClient;
 import cn.ipman.mq.client.client.netty.NettyMQClientPool;
-import cn.ipman.mq.metadata.demo.Order;
+import cn.ipman.mq.metadata.data.Order;
 import cn.ipman.mq.metadata.model.Message;
 import cn.ipman.mq.metadata.model.NettyResponse;
 import cn.ipman.mq.metadata.model.Statistical;

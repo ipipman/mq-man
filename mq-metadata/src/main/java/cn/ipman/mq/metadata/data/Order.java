@@ -1,4 +1,4 @@
-package cn.ipman.mq.metadata.demo;
+package cn.ipman.mq.metadata.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
