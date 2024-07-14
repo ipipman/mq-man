@@ -18,7 +18,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-@SpringBootTest(classes = {MqClientSpringDemoApplication.class})
+@SpringBootTest(classes = {MqClientSpringDemoApplication.class},
+        properties = {"mq.client.host=127.0.0.1", "mq.client.port=8766"})
 class MqClientSpringDemoApplicationTests {
 
     static ApplicationContext context1;
@@ -27,10 +28,15 @@ class MqClientSpringDemoApplicationTests {
     static void init() {
         System.out.println(" ====================================== ");
         System.out.println(" ====================================== ");
-        System.out.println(" ===========  MQ Netty Server   ======= ");
+        System.out.println(" ======    MQ Netty Server 8766     === ");
         System.out.println(" ====================================== ");
         System.out.println(" ====================================== ");
-        context1 = SpringApplication.run(MqServerApplication.class);
+        context1 = SpringApplication.run(MqServerApplication.class,
+                "--server.port=9766",
+                "--mq.server.port=8766",
+                "--mq.server.boss.threads=1",
+                "--mq.server.worker.threads=4"
+        );
     }
 
     @Autowired
@@ -77,7 +83,7 @@ class MqClientSpringDemoApplicationTests {
 
 
     @AfterAll
-    static void destroy(){
+    static void destroy() {
         System.out.println(" ===========     close spring context     ======= ");
         SpringApplication.exit(context1, () -> 1);
     }
