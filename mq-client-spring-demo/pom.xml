@@ -5,12 +5,12 @@
     <parent>
         <groupId>io.github.ipipman</groupId>
         <artifactId>mq-man</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>${mq-man.version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>mq-client-spring-demo</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${mq-man.version}</version>
 
     <name>mq-client-spring-demo</name>
     <description>mq-client-spring-demo</description>
@@ -41,13 +41,13 @@
         <dependency>
             <groupId>io.github.ipipman</groupId>
             <artifactId>mq-client</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${mq-man.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.github.ipipman</groupId>
             <artifactId>mq-server</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${mq-man.version}</version>
             <scope>test</scope>
         </dependency>
 

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.ipipman</groupId>
   <artifactId>mq-client</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1-RELEASE</version>
   <name>mq-client</name>
   <description>mq-client</description>
   <url>https://github.com/ipipman/mq-man/mq-client</url>
@@ -35,7 +35,7 @@
     <dependency>
       <groupId>io.github.ipipman</groupId>
       <artifactId>mq-metadata</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.0.1-RELEASE</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

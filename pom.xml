@@ -11,7 +11,7 @@
 
     <groupId>io.github.ipipman</groupId>
     <artifactId>mq-man</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${mq-man.version}</version>
 
     <name>mq-man</name>
     <description>mq-man</description>
@@ -20,6 +20,7 @@
 
     <properties>
         <java.version>17</java.version>
+        <mq-man.version>0.0.1-RELEASE</mq-man.version>
     </properties>
 
     <modules>
@@ -28,7 +29,7 @@
         <module>mq-metadata</module>
         <module>mq-client-spring-demo</module>
     </modules>
-    
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>

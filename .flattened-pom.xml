@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.ipipman</groupId>
   <artifactId>mq-man</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1-RELEASE</version>
   <packaging>pom</packaging>
   <name>mq-man</name>
   <description>mq-man</description>

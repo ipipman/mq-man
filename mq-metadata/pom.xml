@@ -6,13 +6,12 @@
     <parent>
         <groupId>io.github.ipipman</groupId>
         <artifactId>mq-man</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>${mq-man.version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-
     <artifactId>mq-metadata</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${mq-man.version}</version>
     <name>mq-metadata</name>
     <description>mq-metadata</description>
     <packaging>jar</packaging>
