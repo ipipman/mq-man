@@ -55,6 +55,9 @@ public class Indexer {
     }
 
     public static FileSegment getFileSegment(String topic, int fileIndex) {
+        if (fileSegments == null || !fileSegments.containsKey(topic)){
+            return null;
+        }
         for (FileSegment fileSegment : fileSegments.get(topic)) {
             if (fileSegment.getFileIndex() == fileIndex) {
                 return fileSegment;

@@ -36,15 +36,16 @@ public class MqClientSpringDemoApplication {
             MQConsumer<?> consumer1 = broker.createConsumer(topic, 1);
 
             // ------------ 生产、消费 ------------------
-            for (int i = 0; i < 200; i++) {
+            for (int i = 0; i < 2; i++) {
                 Order order = new Order(ids, "item" + ids, 100 * ids);
                 producer.send(topic, new Message<>(ids++, JSON.toJSONString(order), null));
                 System.out.println("send ok => " + order);
             }
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 2; i++) {
                 Message<Order> message = (Message<Order>) consumer1.receive(topic);
                 System.out.println("poll ok => " + message); // 做业务处理...
+                if (message == null) break;
                 consumer1.ack(topic, message);
             }
 

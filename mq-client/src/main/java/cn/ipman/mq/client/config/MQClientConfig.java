@@ -4,8 +4,10 @@ import cn.ipman.mq.client.broker.MQBroker;
 import cn.ipman.mq.client.broker.MQListenerContainerFactory;
 import cn.ipman.mq.client.broker.MQProducer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 /**
  * Description for this class
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 public class MQClientConfig {
 
     @Bean
+    //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public MQBroker brokerFactory() {
         return MQBroker.getDefault();
     }

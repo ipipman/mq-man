@@ -43,6 +43,14 @@
             <artifactId>mq-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.github.ipipman</groupId>
+            <artifactId>mq-server</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
