@@ -3,7 +3,7 @@ package cn.ipman.mq.metadata.model;
 
 
 /**
- * Description for this class
+ * 全局常量
  *
  * @Author IpMan
  * @Date 2024/6/29 20:07
